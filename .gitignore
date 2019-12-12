@@ -1,0 +1,8 @@
+#VS Code config files
+.vscode
+
+#Executable files
+*.exe
+main
+#Test images
+*.bmp

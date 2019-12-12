@@ -1,17 +1,9 @@
 #include <iostream>
-#include <vector>
-#include <string>
+#include "BMP.h"
 
 using namespace std;
 
 int main()
 {
-
-	vector<string> msg{"Hello", "C++", "World", "as", "VS Code!"};
-
-	for (const string &word : msg)
-	{
-		cout << word << " ";
-	}
-	cout << endl;
+	BMP test("MARBLES.BMP");
 }
