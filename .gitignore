@@ -4,5 +4,10 @@
 #Executable files
 *.exe
 main
+main.out
 #Test images
 *.bmp
+
+#macOS exlusive files
+.DS_Store
+main.out*
