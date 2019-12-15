@@ -14,7 +14,8 @@ class BMP
 public:
 	BMP(uint32_t width, uint32_t height);
 	BMP(std::string name);
-	void load(std::string name);
+	void loadFromFile(std::string name);
+	void saveToFile(std::string name);
 };
 
 #endif
