@@ -59,6 +59,7 @@ void BMP::loadFromFile(std::string name)
 	}
 
 	delete[] data;
+	file.close();
 }
 
 void saveIntToChar(unsigned char *a, int number)
@@ -105,4 +106,16 @@ void BMP::saveToFile(std::string name)
 		}
 		file.write((char *)data, size);
 	}
+
+	delete[] data;
+	file.close();
+}
+
+BMP::~BMP()
+{
+	for (int i = 0; i < m_width; ++i)
+	{
+		delete[] m_pixels[i];
+	}
+	delete m_pixels;
 }

@@ -16,6 +16,7 @@ public:
 	BMP(std::string name);
 	void loadFromFile(std::string name);
 	void saveToFile(std::string name);
+	~BMP();
 };
 
 #endif
