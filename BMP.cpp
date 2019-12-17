@@ -26,6 +26,8 @@ void BMP::loadFromFile(std::string name)
 	//Get width, height and start of pixel array from header
 	m_width = *(int *)&info[18];
 	m_height = *(int *)&info[22];
+	//Checking if BMP is in 32-bit per color mode
+	bool bytesPerPixel = *(int *)&info[28] == 32 ? 4 : 3;
 	//skip to start of pixer array
 	file.seekg(*(char *)&info[10], file.beg);
 
@@ -37,7 +39,7 @@ void BMP::loadFromFile(std::string name)
 	}
 
 	//Getting pixels from file
-	int size = 3 * m_width;
+	int size = bytesPerPixel * m_width;
 	unsigned char *data = new unsigned char[size];
 
 	uint8_t r, g, b;
@@ -53,6 +55,8 @@ void BMP::loadFromFile(std::string name)
 			b = *(data++);
 			g = *(data++);
 			r = *(data++);
+			if (bytesPerPixel == 4) //If alpha channel exists, skip it
+				data++;
 			m_pixels[j][i] = {r, g, b};
 		}
 		data -= size; //resets pointer to point on the start of the array
