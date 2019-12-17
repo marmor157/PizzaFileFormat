@@ -27,7 +27,7 @@ void BMP::loadFromFile(std::string name)
 	m_width = *(int *)&info[18];
 	m_height = *(int *)&info[22];
 	//Checking if BMP is in 32-bit per color mode
-	bool bytesPerPixel = *(int *)&info[28] == 32 ? 4 : 3;
+	int bytesPerPixel = *(int *)&info[28] == 32 ? 4 : 3;
 	//skip to start of pixer array
 	file.seekg(*(char *)&info[10], file.beg);
 
