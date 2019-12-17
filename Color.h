@@ -1,7 +1,7 @@
 #ifndef PIZZA_COLOR
 #define PIZZA_COLOR
 
-#include <stdint.h>
+#include <cstdint>
 
 struct Color
 {
