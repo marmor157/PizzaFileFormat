@@ -1,4 +1,5 @@
 #include "Algs.h"
+#include <algorithm>
 #include <map>
 
 uint8_t RGBtoGrayscale(Color color) {
@@ -32,27 +33,29 @@ int findClosestColorIndexFromTable(Color color, Color *colorTable,
 std::vector<Color> generate6BitColorTable(Color **image, int imageWidth,
                                           int imageHeight) {
   std::vector<Color> retVal;
-  retVal.reserve(64);
-
-  std::map<Color, int> colors;
+  std::vector<int> occurrences;
 
   for (int i = 0; i < imageWidth; ++i) {
     for (int j = 0; j < imageHeight; ++j) {
-      auto index = colors.find(image[i][j]);
-      if (index != colors.end())
-        index->second++;
-      else
-        colors.insert(std::make_pair(image[i][j], 1));
+      auto index =
+          std::find(retVal.begin(), retVal.end(), image[i][j]) - retVal.begin();
+      if (index != retVal.size())
+        occurrences[index]++;
+      else {
+        retVal.push_back(image[i][j]);
+        occurrences.push_back(1);
+      }
     }
   }
 
   int minDifference = 768;
-  std::map<Color, int>::iterator color1, color2;
+  std::vector<Color>::iterator color1, color2;
+  int color1Pos, color2Pos;
 
-  while (colors.size() > 64) {
-    for (auto i = colors.begin(); i != colors.end(); i++) {
-      for (auto j = std::next(i, 1); j != colors.end(); j++) {
-        int difference = getDifferenceInColors(i->first, j->first);
+  while (retVal.size() > 64) {
+    for (auto i = retVal.begin(); i != retVal.end(); i++) {
+      for (auto j = std::next(i, 1); j != retVal.end(); j++) {
+        int difference = getDifferenceInColors(*i, *j);
         if (difference < minDifference) {
           minDifference = difference;
           color1 = i;
@@ -60,20 +63,17 @@ std::vector<Color> generate6BitColorTable(Color **image, int imageWidth,
         }
       }
     }
+    color1Pos = color1 - retVal.begin();
+    color2Pos = color2 - retVal.begin();
 
-    if (color1->second >= color2->second) {
-      color1->second += color2->second;
-      colors.erase(color2);
+    if (occurrences[color1Pos] >= occurrences[color2Pos]) {
+      occurrences[color1Pos] += occurrences[color2Pos];
+      retVal.erase(color2);
     } else {
-      color2->second += color1->second;
-      colors.erase(color1);
+      occurrences[color2Pos] += occurrences[color1Pos];
+      retVal.erase(color1);
     }
     minDifference = 768;
-  }
-
-  int arrayIndex = 0;
-  for (auto it = colors.begin(); it != colors.end(); it++) {
-    retVal.push_back(Color(it->first));
   }
 
   return retVal;
