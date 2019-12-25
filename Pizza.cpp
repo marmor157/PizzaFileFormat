@@ -18,12 +18,30 @@ Pizza::Pizza(std::string name) {
 
   m_width = m_header.width;
   m_height = m_header.height;
-  // Checking if BMP is in 32-bit per color mode
 
-  if (m_header.colorTableAndCRC & 0b11000000 >= 2)
-    file.seekg(60, file.beg);
-  else
-    file.seekg(12, file.beg);
+  int colorTableType = m_header.colorTableAndCRC >> 6;
+
+  if (colorTableType >= 2) {
+    m_colorTable = new Color[64];
+
+    unsigned char colorTableChar[192]; // 64 color, 24 bit for one
+    file.read((char *)&colorTableChar, 192);
+
+    for (int i = 0; i < 64; ++i) {
+      m_colorTable[i] = Color{colorTableChar[i * 3], colorTableChar[i * 3 + 1],
+                              colorTableChar[i * 3 + 2]};
+    }
+
+    file.seekg(204, file.beg); // Skip to pixel table
+  } else {
+    file.seekg(12, file.beg); // Skip to pixel table
+    if (colorTableType == 0)  // Set default color table as current
+      std::copy(std::begin(DEFAULT_COLOR_TABLE), std::end(DEFAULT_COLOR_TABLE),
+                m_colorTable);
+    else // Set default grayscale table as current
+      std::copy(std::begin(DEFAULT_GRAYSCALE_TABLE),
+                std::end(DEFAULT_GRAYSCALE_TABLE), m_colorTable);
+  }
 
   // Declaring pixels array
   m_pixels = new Color *[m_width];
@@ -39,18 +57,19 @@ Pizza::Pizza(std::string name) {
 
   // Copying pixel data from file to Pixels array
   for (int i = m_height; i >= 0; --i) {
-    // BMP saves pixels from the bottom left, so do i
+    // Reading pixels from bottom left corner
     file.read((char *)data, size); // read data every line, reading whole file
-                                   // would couse problems with largers images
+                                   // could couse problems with largers images
 
     for (int j = 0; j < m_width; ++j) {
-      // BMP saves in order: blue, green, red
-      b = *(data++);
-      g = *(data++);
-      r = *(data++);
-      m_pixels[j][i] = {r, g, b};
+      // in order: blue, green, red (little endian)
+      // getting 2 bits for every color
+      b = (data[(j * 6) / 8] >> (j * 6) % 8) & 0x02;
+      g = (data[(j * 6 + 2) / 8] >> (j * 6 + 2) % 8) & 0x02;
+      r = (data[(j * 6 + 4) / 8] >> (j * 6 + 4) % 8) & 0x02;
+      // Get matching color from color table
+      m_pixels[j][i] = m_colorTable[16 * r + 4 * g + b];
     }
-    data -= size; // resets pointer to point on the start of the array
   }
 
   delete[] data;
@@ -68,4 +87,12 @@ Pizza::Pizza(BMP bmp) {
       m_pixels[i][j] = bmp.getPixel(i, j);
     }
   }
+}
+
+Pizza::~Pizza() {
+  delete[] m_colorTable;
+  for (int i = 0; i < m_width; ++i) {
+    delete[] m_pixels[i];
+  }
+  delete[] m_pixels;
 }

@@ -61,6 +61,7 @@ void BMP::loadFromFile(std::string name) {
   file.close();
 }
 
+// Saving int to char, little endian safe
 void saveIntToChar(unsigned char *a, int number) {
   a[0] = number & 0xff;
   a[1] = (number >> 8) & 0xff;
@@ -95,7 +96,7 @@ void BMP::saveToFile(std::string name) {
   // Saving rom bottom row to the first
   for (int i = m_height; i >= 0; i--) {
     for (int j = 0; j < m_width; j++) {
-      // again in reverse order, little endian
+      // save in reverse order, little endian
       data[j * 3] = (char)m_pixels[j][i].b;
       data[j * 3 + 1] = (char)m_pixels[j][i].g;
       data[j * 3 + 2] = (char)m_pixels[j][i].r;
@@ -105,6 +106,11 @@ void BMP::saveToFile(std::string name) {
 
   delete[] data;
   file.close();
+}
+
+Color BMP::getPixel(int x, int y) {
+  if (x < m_width && y < m_height)
+    return m_pixels[x][y];
 }
 
 BMP::~BMP() {

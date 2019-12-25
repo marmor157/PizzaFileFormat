@@ -16,6 +16,9 @@ public:
   BMP(std::string name);
   void loadFromFile(std::string name);
   void saveToFile(std::string name);
+  uint32_t getWidth() { return m_width; }
+  uint32_t getHeight() { return m_height; }
+  Color getPixel(int i, int j);
   ~BMP();
 };
 

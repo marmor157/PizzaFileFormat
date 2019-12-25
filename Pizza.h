@@ -2,6 +2,8 @@
 #define PIZZA_PIZZA
 #include "BMP.h"
 #include "Color.h"
+#include "DefaultColorTable.h"
+#include "DefaultGrayscaleTable.h"
 #include "PizzaHeader.h"
 #include <fstream>
 #include <string>
@@ -17,6 +19,7 @@ public:
   Pizza(int width, int height);
   Pizza(std::string name);
   Pizza(BMP bmp);
+  ~Pizza();
 };
 
 #endif
