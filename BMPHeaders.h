@@ -3,6 +3,7 @@
 
 #include <cstdint>
 
+#pragma pack(push, 1) // Need to add so the program reads headers properly
 struct BMPFileHeader {
   uint16_t signature{0x4D42}; // Should be "BM" in hex which is 0x4D42
   uint32_t fileSize{0};
@@ -26,5 +27,7 @@ struct BMPDIBHeader {
   uint8_t colorsRotation{0};
   uint16_t reserved{0};
 };
+
+#pragma pack(pop)
 
 #endif

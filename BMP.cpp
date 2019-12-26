@@ -19,7 +19,7 @@ void BMP::loadFromFile(std::string name) {
   // Read file info
   file.read((char *)&m_fileHeader, 14);
 
-  if (m_fileHeader.signature == 0x4D42) {
+  if (m_fileHeader.signature != 0x4D42) {
     throw std::runtime_error("Error! Unrecognized file format.");
   }
 
@@ -38,7 +38,7 @@ void BMP::loadFromFile(std::string name) {
   }
 
   // Getting pixels from file
-  int size = m_DIBHeader.bitsPerPixel / 4 * m_width;
+  int size = m_DIBHeader.bitsPerPixel / 8 * m_width;
   unsigned char *data = new unsigned char[size];
 
   uint8_t r, g, b;
@@ -77,22 +77,19 @@ void BMP::saveToFile(std::string name) {
   std::fstream file;
   file.open(name, std::ios::out | std::ios::binary);
 
-  // Creating header
-  unsigned char header[54] = {0};
-  header[0] = 'B';
-  header[1] = 'M';
-  saveIntToChar(header + 2, m_width * m_height * 3 + 54); // info about file
-                                                          // size
-  saveIntToChar(header + 10, 54); // info about start position of pixel array
-  saveIntToChar(header + 14, 40); // info
-  saveIntToChar(header + 18, m_width);      // info about width of image
-  saveIntToChar(header + 22, m_height);     // info aoubt height of image
-  saveIntToChar(header + 26, (uint16_t)1);  // info about planes number
-  saveIntToChar(header + 26, (uint16_t)24); // info about bites per pixel
-  saveIntToChar(header + 34,
-                m_height * m_width * 3); // info about raw image size
+  m_DIBHeader.headerSize = 40; // Setting basic DIB header size
+  m_fileHeader.dataPosition =
+      14 + m_DIBHeader.headerSize; // File header always takes 14 bytes
+  m_fileHeader.fileSize = m_width * m_height * 3 + m_fileHeader.dataPosition;
 
-  file.write((char *)header, 54);
+  m_DIBHeader.width = m_width;
+  m_DIBHeader.height = m_height;
+  m_DIBHeader.bitsPerPixel = 24; // Saving with aplha channel not supported
+  m_DIBHeader.imageSize = m_height * m_width * 3;
+
+  file.write((char *)&m_fileHeader, 14); // Saving file header to file
+  file.write((char *)&m_DIBHeader,
+             m_DIBHeader.headerSize); // saving DIB header to file
 
   int size = 3 * m_width;
   unsigned char *data = new unsigned char[size];
