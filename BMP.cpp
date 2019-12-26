@@ -1,5 +1,6 @@
 #include "BMP.h"
 
+#include <exception>
 #include <iostream>
 
 BMP::BMP(uint32_t width, uint32_t height)
@@ -15,17 +16,20 @@ void BMP::loadFromFile(std::string name) {
   std::fstream file;
   file.open(name, std::ios::in | std::ios::binary);
 
-  // Read header and DIB of BMP
-  unsigned char info[54];
-  file.read((char *)&info, 54);
+  // Read file info
+  file.read((char *)&m_fileHeader, 14);
 
-  // Get width, height and start of pixel array from header
-  m_width = *(int *)&info[18];
-  m_height = *(int *)&info[22];
-  // Checking if BMP is in 32-bit per color mode
-  int bytesPerPixel = *(int *)&info[28] == 32 ? 4 : 3;
+  if (m_fileHeader.signature == 0x4D42) {
+    throw std::runtime_error("Error! Unrecognized file format.");
+  }
+
+  file.read((char *)&m_DIBHeader, sizeof(m_DIBHeader));
+
+  m_width = m_DIBHeader.width;
+  m_height = m_DIBHeader.height;
+
   // skip to start of pixer array
-  file.seekg(*(char *)&info[10], file.beg);
+  file.seekg(*(char *)&m_fileHeader.dataPosition, file.beg);
 
   // Declaring pixels array
   m_pixels = new Color *[m_width];
@@ -34,7 +38,7 @@ void BMP::loadFromFile(std::string name) {
   }
 
   // Getting pixels from file
-  int size = bytesPerPixel * m_width;
+  int size = m_DIBHeader.bitsPerPixel / 4 * m_width;
   unsigned char *data = new unsigned char[size];
 
   uint8_t r, g, b;
@@ -50,7 +54,7 @@ void BMP::loadFromFile(std::string name) {
       b = *(data++);
       g = *(data++);
       r = *(data++);
-      if (bytesPerPixel == 4) // If alpha channel exists, skip it
+      if (m_DIBHeader.bitsPerPixel == 32) // If alpha channel exists, skip it
         data++;
       m_pixels[j][i] = {r, g, b};
     }

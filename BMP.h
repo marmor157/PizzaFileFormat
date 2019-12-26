@@ -4,12 +4,15 @@
 #include <fstream>
 #include <string>
 
+#include "BMPHeaders.h"
 #include "Color.h"
 
 class BMP {
   uint32_t m_width;
   uint32_t m_height;
   Color **m_pixels;
+  BMPFileHeader m_fileHeader;
+  BMPDIBHeader m_DIBHeader;
 
 public:
   BMP(uint32_t width, uint32_t height);

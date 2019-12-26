@@ -13,7 +13,7 @@ Pizza::Pizza(std::string name) {
 
   file.read((char *)&m_header, 11);
 
-  if (m_header.magicValue != "PIZZA")
+  if (m_header.signature != "PIZZA")
     return;
 
   m_width = m_header.width;

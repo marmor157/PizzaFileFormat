@@ -4,7 +4,7 @@
 #include <cstdint>
 
 struct PizzaHeader {
-  char magicValue[5] = {'P', 'I', 'Z', 'Z', 'A'};
+  char signature[5] = {'P', 'I', 'Z', 'Z', 'A'};
   uint16_t width;
   uint16_t height;
   uint8_t LZWWordLength;
