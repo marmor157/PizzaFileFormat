@@ -78,3 +78,39 @@ std::vector<Color> generate6BitColorTable(Color **image, int imageWidth,
 
   return retVal;
 }
+
+std::string generateLZWCompressedImage(Color **image, int imageWidth,
+                                       int imageHeight) {
+  std::map<std::string, int> dictionary;
+
+  for (int i = 0; i < 256; ++i) {
+    dictionary[std::string(1, i)] = i;
+  }
+
+  std::string uncompressed;
+  for (int i = 0; i < imageWidth; ++i) {
+    for (int j = 0; j < imageHeight; ++j) {
+      uncompressed += image[i][j].toString();
+    }
+  }
+
+  std::string c = {uncompressed[0]};
+  std::string s;
+  std::string cs;
+  std::string result;
+
+  for (int i = 1; i < uncompressed.size(); ++i) {
+    s = uncompressed[i];
+    cs = c + s;
+    if (dictionary.count(cs))
+      c = cs;
+    else {
+      result += dictionary[c];
+      dictionary[cs] = dictionary.size() + 1;
+      c = s;
+    }
+  }
+  if (!c.empty())
+    result += dictionary[c];
+  return result;
+}

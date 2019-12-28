@@ -7,14 +7,30 @@ Pizza::Pizza(int width, int height)
   }
 }
 
-Pizza::Pizza(std::string name) {
+Pizza::Pizza(std::string name) { loadFromFile(name); }
+
+Pizza::Pizza(BMP bmp) {
+  m_width = bmp.getWidth();
+  m_height = bmp.getHeight();
+
+  m_pixels = new Color *[m_width];
+  for (int i = 0; i < m_width; ++i) {
+    m_pixels[i] = new Color[m_height];
+    for (int j = 0; j < m_height; ++j) {
+      m_pixels[i][j] = bmp.getPixel(i, j);
+    }
+  }
+}
+
+void Pizza::loadFromFile(std::string name) {
   std::fstream file;
   file.open(name, std::ios::in | std::ios::binary);
 
   file.read((char *)&m_header, 11);
 
-  if (m_header.signature != "PIZZA")
-    return;
+  if (m_header.signature != "PIZZA") {
+    throw std::runtime_error("Error! Unrecognized file format.");
+  }
 
   m_width = m_header.width;
   m_height = m_header.height;
@@ -74,19 +90,6 @@ Pizza::Pizza(std::string name) {
 
   delete[] data;
   file.close();
-}
-
-Pizza::Pizza(BMP bmp) {
-  m_width = bmp.getWidth();
-  m_height = bmp.getHeight();
-
-  m_pixels = new Color *[m_width];
-  for (int i = 0; i < m_width; ++i) {
-    m_pixels[i] = new Color[m_height];
-    for (int j = 0; j < m_height; ++j) {
-      m_pixels[i][j] = bmp.getPixel(i, j);
-    }
-  }
 }
 
 Pizza::~Pizza() {

@@ -18,6 +18,7 @@ class Pizza {
 public:
   Pizza(int width, int height);
   Pizza(std::string name);
+  void loadFromFile(std::string name);
   Pizza(BMP bmp);
   ~Pizza();
 };

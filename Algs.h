@@ -2,7 +2,9 @@
 #define PIZZA_ALGORITHMS
 #include <cmath>
 #include <cstdint>
+#include <string>
 #include <vector>
+
 
 #include "Color.h"
 
@@ -13,5 +15,8 @@ int findClosestColorIndexFromTable(Color color, Color *colorTable,
 
 std::vector<Color> generate6BitColorTable(Color **image, int imageWidth,
                                           int imageHeight);
+
+std::string generateLZWCompressedImage(Color **image, int imageWidth,
+                                       int imageHeight);
 
 #endif

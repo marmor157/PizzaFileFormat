@@ -17,6 +17,10 @@ struct Color {
       return false;
     return true;
   }
+
+  std::string toString() {
+    return std::string(1, r) + std::string(1, g) + std::string(1, b);
+  }
 };
 
 #endif
