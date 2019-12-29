@@ -6,6 +6,9 @@
 
 #include "BMPHeaders.h"
 #include "Color.h"
+#include "Pizza.h"
+
+class Pizza;
 
 class BMP {
   uint32_t m_width;
@@ -17,6 +20,7 @@ class BMP {
 public:
   BMP(uint32_t width, uint32_t height);
   BMP(std::string name);
+  BMP(Pizza pizza);
   void loadFromFile(std::string name);
   void saveToFile(std::string name);
   uint32_t getWidth() { return m_width; }

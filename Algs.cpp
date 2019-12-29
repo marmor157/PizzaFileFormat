@@ -79,14 +79,16 @@ std::vector<Color> generate6BitColorTable(Color **image, int imageWidth,
   return retVal;
 }
 
-std::string generateLZWCompressedImage(Color **image, int imageWidth,
-                                       int imageHeight) {
+std::vector<int> generateLZWCompressedImage(Color **image, int imageWidth,
+                                            int imageHeight) {
   std::map<std::string, int> dictionary;
 
+  // Initializing dictionary with values from 0 to 255
   for (int i = 0; i < 256; ++i) {
     dictionary[std::string(1, i)] = i;
   }
 
+  // Converting two dimenssional table to string
   std::string uncompressed;
   for (int i = 0; i < imageWidth; ++i) {
     for (int j = 0; j < imageHeight; ++j) {
@@ -94,23 +96,78 @@ std::string generateLZWCompressedImage(Color **image, int imageWidth,
     }
   }
 
-  std::string c = {uncompressed[0]};
-  std::string s;
-  std::string cs;
-  std::string result;
+  // delcaration of variable used in algorithm
+  std::string previous = {uncompressed[0]};
+  std::string current;
+  std::string pc; // previous + current;
+  std::vector<int> retVal;
 
   for (int i = 1; i < uncompressed.size(); ++i) {
-    s = uncompressed[i];
-    cs = c + s;
-    if (dictionary.count(cs))
-      c = cs;
+    current = uncompressed[i];
+    pc = previous + current;
+    if (dictionary.count(pc))
+      previous = pc;
     else {
-      result += dictionary[c];
-      dictionary[cs] = dictionary.size() + 1;
-      c = s;
+      retVal.push_back(dictionary[previous]);
+      dictionary[pc] = dictionary.size() + 1;
+      previous = current;
     }
   }
-  if (!c.empty())
-    result += dictionary[c];
-  return result;
+
+  // If something is left add it to return value
+  if (!previous.empty())
+    retVal.push_back(dictionary[previous]);
+
+  return retVal;
+}
+
+std::string decompressLZWImage(std::vector<int> compressed) {
+  std::map<int, std::string> dictionary;
+
+  // Initializing dictionary with values from 0 to 255
+  for (int i = 0; i < 256; ++i) {
+    dictionary[i] = std::string(1, i);
+  }
+
+  // Declaration of variables used in algorithm
+  std::string previous(1, compressed[0]);
+  std::string retVal = previous;
+  std::string entry;
+  int current;
+
+  for (int i = 1; i < compressed.size(); ++i) {
+    current = compressed[i];
+    if (dictionary.count(current))
+      entry = dictionary[current];
+    else if (current == dictionary.size())
+      entry = previous + previous[0];
+    else
+      throw "Bad compressed current";
+
+    retVal += entry;
+    dictionary[dictionary.size() + 1] = previous + entry[0];
+
+    previous = entry;
+  }
+
+  return retVal;
+}
+
+void convertStringToColor(std::string input, Color **image, int imageWidth,
+                          int imageHeight) {
+
+  std::string::iterator current = input.begin();
+
+  for (int i = 0; i < imageWidth; ++i) {
+    for (int j = 0; j < imageHeight; ++j) {
+      int currentPosition = std::distance(input.begin(), current);
+
+      if (currentPosition % 3 == 0)
+        image[i][j].r = (uint8_t)*current;
+      else if (currentPosition % 3 == 1)
+        image[i][j].g = (uint8_t)*current;
+      else
+        image[i][j].b = (uint8_t)*current;
+    }
+  }
 }

@@ -92,6 +92,11 @@ void Pizza::loadFromFile(std::string name) {
   file.close();
 }
 
+Color Pizza::getPixel(int x, int y) {
+  if (x < m_width && y < m_height)
+    return m_pixels[x][y];
+}
+
 Pizza::~Pizza() {
   delete[] m_colorTable;
   for (int i = 0; i < m_width; ++i) {

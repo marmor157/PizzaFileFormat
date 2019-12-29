@@ -12,6 +12,19 @@ BMP::BMP(uint32_t width, uint32_t height)
 
 BMP::BMP(std::string name) { loadFromFile(name); }
 
+BMP::BMP(Pizza pizza) {
+  m_width = pizza.getWidth();
+  m_height = pizza.getHeight();
+
+  m_pixels = new Color *[m_width];
+  for (int i = 0; i < m_width; ++i) {
+    m_pixels[i] = new Color[m_height];
+    for (int j = 0; j < m_height; ++j) {
+      m_pixels[i][j] = pizza.getPixel(i, j);
+    }
+  }
+}
+
 void BMP::loadFromFile(std::string name) {
   std::fstream file;
   file.open(name, std::ios::in | std::ios::binary);
