@@ -11,6 +11,7 @@
 class Pizza;
 
 class BMP {
+public:
   uint32_t m_width;
   uint32_t m_height;
   Color **m_pixels;

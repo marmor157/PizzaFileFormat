@@ -6,17 +6,21 @@
 using namespace std;
 
 int main() {
-  BMP test("MARBLES.BMP");
-  test.saveToFile("obrazek32.bmp");
+  BMP test("obrazek3.bmp");
+  test.saveToFile("obrazek321.bmp");
 
-  Pizza testPizza(test);
-  std::vector<int> compressed = generateLZWCompressedImage(
-      testPizza.m_pixels, testPizza.m_width, testPizza.m_height);
+  // Pizza testPizza(test);
+  std::list<int> compressed =
+      generateLZWCompressedImage(test.m_pixels, test.m_width, test.m_height);
 
-  convertStringToColor(decompressLZWImage(compressed), testPizza.m_pixels,
-                       testPizza.m_width, testPizza.m_height);
+  cout << (int)(getMinimumNumberOfBits(compressed));
 
-  test = BMP(testPizza);
+  std::string decompressed = decompressLZWImage(compressed);
+
+  convertStringToColor(decompressed, test.m_pixels, test.m_width,
+                       test.m_height);
+
+  // test = BMP(testPizza);
   test.saveToFile("obrazek32.bmp");
 
   return 1;

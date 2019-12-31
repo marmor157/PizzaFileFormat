@@ -79,8 +79,8 @@ std::vector<Color> generate6BitColorTable(Color **image, int imageWidth,
   return retVal;
 }
 
-std::vector<int> generateLZWCompressedImage(Color **image, int imageWidth,
-                                            int imageHeight) {
+std::list<int> generateLZWCompressedImage(Color **image, int imageWidth,
+                                          int imageHeight) {
   std::map<std::string, int> dictionary;
 
   // Initializing dictionary with values from 0 to 255
@@ -95,12 +95,11 @@ std::vector<int> generateLZWCompressedImage(Color **image, int imageWidth,
       uncompressed += image[i][j].toString();
     }
   }
-
   // delcaration of variable used in algorithm
   std::string previous = {uncompressed[0]};
   std::string current;
   std::string pc; // previous + current;
-  std::vector<int> retVal;
+  std::list<int> retVal;
 
   for (int i = 1; i < uncompressed.size(); ++i) {
     current = uncompressed[i];
@@ -121,7 +120,7 @@ std::vector<int> generateLZWCompressedImage(Color **image, int imageWidth,
   return retVal;
 }
 
-std::string decompressLZWImage(std::vector<int> compressed) {
+std::string decompressLZWImage(std::list<int> compressed) {
   std::map<int, std::string> dictionary;
 
   // Initializing dictionary with values from 0 to 255
@@ -130,19 +129,18 @@ std::string decompressLZWImage(std::vector<int> compressed) {
   }
 
   // Declaration of variables used in algorithm
-  std::string previous(1, compressed[0]);
+  std::string previous(1, *compressed.begin());
   std::string retVal = previous;
   std::string entry;
   int current;
 
-  for (int i = 1; i < compressed.size(); ++i) {
-    current = compressed[i];
+  for (auto it = ++(compressed.begin()); it != compressed.end(); ++it) {
+    current = *it;
+
     if (dictionary.count(current))
       entry = dictionary[current];
-    else if (current == dictionary.size())
-      entry = previous + previous[0];
     else
-      throw "Bad compressed current";
+      entry = previous + previous[0];
 
     retVal += entry;
     dictionary[dictionary.size() + 1] = previous + entry[0];
@@ -170,4 +168,23 @@ void convertStringToColor(std::string input, Color **image, int imageWidth,
         image[i][j].b = (uint8_t)*current;
     }
   }
+}
+
+uint8_t getMinimumNumberOfBits(std::list<int> data) {
+  uint8_t retVal = 0;
+
+  int currentBits = 0;
+
+  for (auto it = data.begin(); it != data.end(); ++it) {
+    *it >>= 8; // values up to 255 are default so we can skip that
+    while (*it > 0) {
+      *it >>= 1;
+      ++currentBits;
+    }
+    if (currentBits > retVal)
+      retVal = currentBits;
+    currentBits = 0;
+  }
+
+  return retVal + 8;
 }
