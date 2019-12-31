@@ -57,7 +57,7 @@ void BMP::loadFromFile(std::string name) {
   uint8_t r, g, b;
 
   // Copying pixel data from file to Pixels array
-  for (int i = m_height; i >= 0; --i) {
+  for (int i = m_height - 1; i >= 0; --i) {
     // BMP saves pixels from the bottom left, so do i
     file.read((char *)data, size); // read data every line, reading whole file
                                    // would couse problems with largers images
@@ -108,7 +108,7 @@ void BMP::saveToFile(std::string name) {
   unsigned char *data = new unsigned char[size];
 
   // Saving rom bottom row to the first
-  for (int i = m_height; i >= 0; i--) {
+  for (int i = m_height - 1; i >= 0; i--) {
     for (int j = 0; j < m_width; j++) {
       // save in reverse order, little endian
       data[j * 3] = (char)m_pixels[j][i].b;

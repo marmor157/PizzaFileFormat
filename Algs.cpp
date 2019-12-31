@@ -84,6 +84,7 @@ std::list<int> generateLZWCompressedImage(Color **image, int imageWidth,
   std::map<std::string, int> dictionary;
 
   // Initializing dictionary with values from 0 to 255
+  int dictSize = 256;
   for (int i = 0; i < 256; ++i) {
     dictionary[std::string(1, i)] = i;
   }
@@ -96,20 +97,20 @@ std::list<int> generateLZWCompressedImage(Color **image, int imageWidth,
     }
   }
   // delcaration of variable used in algorithm
-  std::string previous = {uncompressed[0]};
-  std::string current;
+  std::string previous;
+  char current;
   std::string pc; // previous + current;
   std::list<int> retVal;
 
-  for (int i = 1; i < uncompressed.size(); ++i) {
-    current = uncompressed[i];
+  for (auto it = uncompressed.begin(); it != uncompressed.end(); ++it) {
+    current = *it;
     pc = previous + current;
     if (dictionary.count(pc))
       previous = pc;
     else {
       retVal.push_back(dictionary[previous]);
-      dictionary[pc] = dictionary.size() + 1;
-      previous = current;
+      dictionary[pc] = dictSize++;
+      previous = std::string(1, current);
     }
   }
 
@@ -124,6 +125,7 @@ std::string decompressLZWImage(std::list<int> compressed) {
   std::map<int, std::string> dictionary;
 
   // Initializing dictionary with values from 0 to 255
+  int dictSize = 256;
   for (int i = 0; i < 256; ++i) {
     dictionary[i] = std::string(1, i);
   }
@@ -139,11 +141,13 @@ std::string decompressLZWImage(std::list<int> compressed) {
 
     if (dictionary.count(current))
       entry = dictionary[current];
-    else
+    else if (current == dictSize) {
       entry = previous + previous[0];
+    } else
+      throw "Bad compressed list";
 
     retVal += entry;
-    dictionary[dictionary.size() + 1] = previous + entry[0];
+    dictionary[dictSize++] = previous + entry[0];
 
     previous = entry;
   }
@@ -161,11 +165,11 @@ void convertStringToColor(std::string input, Color **image, int imageWidth,
       int currentPosition = std::distance(input.begin(), current);
 
       if (currentPosition % 3 == 0)
-        image[i][j].r = (uint8_t)*current;
+        image[i][j].r = *current;
       else if (currentPosition % 3 == 1)
-        image[i][j].g = (uint8_t)*current;
+        image[i][j].g = *current;
       else
-        image[i][j].b = (uint8_t)*current;
+        image[i][j].b = *current;
     }
   }
 }

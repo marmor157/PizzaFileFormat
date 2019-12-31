@@ -19,7 +19,7 @@ struct Color {
     return true;
   }
 
-  std::string toString() { return std::string(1, r) + (char)g + (char)b; }
+  std::string toString() { return std::string(1, (char)r) + (char)g + (char)b; }
 };
 
 #endif

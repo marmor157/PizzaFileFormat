@@ -72,7 +72,7 @@ void Pizza::loadFromFile(std::string name) {
   uint8_t r, g, b;
 
   // Copying pixel data from file to Pixels array
-  for (int i = m_height; i >= 0; --i) {
+  for (int i = m_height - 1; i >= 0; --i) {
     // Reading pixels from bottom left corner
     file.read((char *)data, size); // read data every line, reading whole file
                                    // could couse problems with largers images
