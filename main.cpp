@@ -6,10 +6,10 @@
 using namespace std;
 
 int main() {
-  BMP test("obrazek3.bmp");
-  cout << (int)test.getPixel(25, 3).r << std::endl;
+  BMP test("obrazek4.bmp");
+
   test.saveToFile("obrazek321.bmp");
-  cout << (int)test.getPixel(25, 3).g << std::endl;
+
   std::list<int> compressed =
       generateLZWCompressedImage(test.m_pixels, test.m_width, test.m_height);
 
@@ -17,7 +17,7 @@ int main() {
 
   convertStringToColor(decompressed, test.m_pixels, test.m_width,
                        test.m_height);
-  cout << (int)test.getPixel(25, 3).r << std::endl;
+
   test.saveToFile("obrazek32.bmp");
 
   return 1;

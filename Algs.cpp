@@ -1,5 +1,7 @@
 #include "Algs.h"
 #include <algorithm>
+#include <cstdint>
+#include <iostream>
 #include <map>
 
 uint8_t RGBtoGrayscale(Color color) {
@@ -11,7 +13,7 @@ int getDifferenceInColors(Color color1, Color color2) {
          abs(color1.b - color2.b);
 }
 
-int findClosestColorIndexFromTable(Color color, Color *colorTable,
+int findClosestColorIndexFromTable(Color color, const Color *colorTable,
                                    int colorTableSize) {
   int retVal = 0;
 
@@ -162,14 +164,9 @@ void convertStringToColor(std::string input, Color **image, int imageWidth,
 
   for (int i = 0; i < imageWidth; ++i) {
     for (int j = 0; j < imageHeight; ++j) {
-      int currentPosition = std::distance(input.begin(), current);
-
-      if (currentPosition % 3 == 0)
-        image[i][j].r = *current;
-      else if (currentPosition % 3 == 1)
-        image[i][j].g = *current;
-      else
-        image[i][j].b = *current;
+      image[i][j].r = (uint8_t)*current++;
+      image[i][j].g = (uint8_t)*current++;
+      image[i][j].b = (uint8_t)*current++;
     }
   }
 }

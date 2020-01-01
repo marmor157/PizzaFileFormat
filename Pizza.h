@@ -25,7 +25,8 @@ public:
   void loadFromFile(std::string name);
   int getWidth() { return m_width; }
   int getHeight() { return m_height; }
-  Color getPixel(int x, int y);
+  Color getPixel(int x, int y) { return m_pixels[x][y]; };
+  void convertColorTo6bit();
   ~Pizza();
 };
 

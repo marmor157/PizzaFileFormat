@@ -1,4 +1,5 @@
 #include "Pizza.h"
+#include "Algs.h"
 
 Pizza::Pizza(int width, int height)
     : m_width(width), m_height(height), m_pixels(new Color *[width]) {
@@ -92,9 +93,13 @@ void Pizza::loadFromFile(std::string name) {
   file.close();
 }
 
-Color Pizza::getPixel(int x, int y) {
-  if (x < m_width && y < m_height)
-    return m_pixels[x][y];
+void Pizza::convertColorTo6bit() {
+  for (int i = 0; i < m_width; ++i) {
+    for (int j = 0; j < m_height; ++j) {
+      m_pixels[i][j] = DEFAULT_COLOR_TABLE[findClosestColorIndexFromTable(
+          m_pixels[i][j], DEFAULT_COLOR_TABLE, 64)];
+    }
+  }
 }
 
 Pizza::~Pizza() {
