@@ -256,3 +256,24 @@ uint8_t getMinimumNumberOfBits(std::list<int> data) {
 void copyColorTable(const Color *source, Color *destination) {
   std::copy(source, source + 64, destination);
 }
+
+void writeBit(std::fstream &file, int bit, bool force) {
+  static int current_bit = 0;
+  static unsigned char bit_buffer;
+
+  if (force) {
+    bit_buffer <<= 8 - current_bit;
+    current_bit = 7;
+  }
+
+  if (bit)
+    bit_buffer |= (1 << current_bit);
+
+  ++current_bit;
+
+  if (current_bit == 8) {
+    file.write((char *)&bit_buffer, 1);
+    current_bit = 0;
+    bit_buffer = 0;
+  }
+}

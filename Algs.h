@@ -2,6 +2,7 @@
 #define PIZZA_ALGORITHMS
 #include <cmath>
 #include <cstdint>
+#include <fstream>
 #include <list>
 #include <string>
 #include <vector>
@@ -27,5 +28,7 @@ void convertStringToColor(std::string input, Color **image, int imageWidth,
 uint8_t getMinimumNumberOfBits(std::list<int> data);
 
 void copyColorTable(const Color *source, Color *destination);
+
+void writeBit(std::fstream &file, int bit, bool force = 0);
 
 #endif
