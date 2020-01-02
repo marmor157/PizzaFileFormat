@@ -19,6 +19,11 @@ struct Color {
     return true;
   }
 
+  /**
+   * @brief Returns Color as a three character string
+   *
+   * @return std::string
+   */
   std::string toString() { return std::string(1, (char)r) + (char)g + (char)b; }
 };
 

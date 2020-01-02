@@ -4,15 +4,36 @@
 #include <iostream>
 #include <map>
 
+/**
+ * @brief converts RGB value to grayscale
+ *
+ * @param color
+ * @return uint8_t
+ */
 uint8_t RGBtoGrayscale(Color color) {
   return 0.299 * color.r + 0.587 * color.g + 0.114 * color.b;
 }
 
+/**
+ * @brief Get the Difference In Colors object values
+ *
+ * @param color1
+ * @param color2
+ * @return int
+ */
 int getDifferenceInColors(Color color1, Color color2) {
   return abs(color1.r - color2.r) + abs(color1.g - color2.g) +
          abs(color1.b - color2.b);
 }
 
+/**
+ * @brief Returs index of Color closest to given one in given Color Table
+ *
+ * @param color
+ * @param colorTable
+ * @param colorTableSize
+ * @return int
+ */
 int findClosestColorIndexFromTable(Color color, const Color *colorTable,
                                    int colorTableSize) {
   int retVal = 0;
@@ -32,6 +53,14 @@ int findClosestColorIndexFromTable(Color color, const Color *colorTable,
   return retVal;
 }
 
+/**
+ * @brief Generates custom 6 bit color table for best image reproduction
+ *
+ * @param image Two dimensional array of Colors, image[width][height]
+ * @param imageWidth
+ * @param imageHeight
+ * @return std::vector<Color>
+ */
 std::vector<Color> generate6BitColorTable(Color **image, int imageWidth,
                                           int imageHeight) {
   std::vector<Color> retVal;
@@ -81,6 +110,14 @@ std::vector<Color> generate6BitColorTable(Color **image, int imageWidth,
   return retVal;
 }
 
+/**
+ * @brief returns compressed image using LZW compression
+ *
+ * @param image Two dimensional array of Colors, image[width][height]
+ * @param imageWidth
+ * @param imageHeight
+ * @return std::list<int>
+ */
 std::list<int> generateLZWCompressedImage(Color **image, int imageWidth,
                                           int imageHeight) {
   std::map<std::string, int> dictionary;
@@ -123,6 +160,12 @@ std::list<int> generateLZWCompressedImage(Color **image, int imageWidth,
   return retVal;
 }
 
+/**
+ * @brief decompresses image from LZW compression
+ *
+ * @param compressed
+ * @return std::string
+ */
 std::string decompressLZWImage(std::list<int> compressed) {
   std::map<int, std::string> dictionary;
 
@@ -157,6 +200,14 @@ std::string decompressLZWImage(std::list<int> compressed) {
   return retVal;
 }
 
+/**
+ * @brief Converts decompressed string to 2D array of Colors
+ *
+ * @param input
+ * @param image Two dimensional array of Colors, image[width][height]
+ * @param imageWidth
+ * @param imageHeight
+ */
 void convertStringToColor(std::string input, Color **image, int imageWidth,
                           int imageHeight) {
 
@@ -171,6 +222,12 @@ void convertStringToColor(std::string input, Color **image, int imageWidth,
   }
 }
 
+/**
+ * @brief Get the Minimum Number Of Bits per value needed to save given data
+ *
+ * @param data
+ * @return uint8_t
+ */
 uint8_t getMinimumNumberOfBits(std::list<int> data) {
   uint8_t retVal = 0;
 
@@ -188,4 +245,14 @@ uint8_t getMinimumNumberOfBits(std::list<int> data) {
   }
 
   return retVal + 8;
+}
+
+/**
+ * @brief copies color table to another
+ *
+ * @param source
+ * @param destination
+ */
+void copyColorTable(const Color *source, Color *destination) {
+  std::copy(source, source + 64, destination);
 }

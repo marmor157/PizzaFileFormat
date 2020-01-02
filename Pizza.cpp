@@ -1,28 +1,62 @@
 #include "Pizza.h"
 #include "Algs.h"
 
-Pizza::Pizza(int width, int height)
-    : m_width(width), m_height(height), m_pixels(new Color *[width]) {
+/**
+ * @brief Construct a new Pizza:: Pizza object
+ *
+ * @param width
+ * @param height
+ * @param colorTable 0=Color, 1=Grayscale, >1=Custom
+ */
+Pizza::Pizza(int width, int height, int colorTable = 0)
+    : m_width(width), m_height(height), m_pixels(new uint8_t *[width]) {
   for (int i = 0; i < width; ++i) {
-    m_pixels[i] = new Color[height];
+    m_pixels[i] = new uint8_t[height];
   }
+
+  if (colorTable)
+    copyColorTable(DEFAULT_GRAYSCALE_TABLE, m_colorTable);
+  else
+    copyColorTable(DEFAULT_COLOR_TABLE, m_colorTable);
 }
 
+/**
+ * @brief Construct a new Pizza:: Pizza object with loading from file initiated
+ *
+ * @param name File name
+ */
 Pizza::Pizza(std::string name) { loadFromFile(name); }
 
-Pizza::Pizza(BMP bmp) {
+/**
+ * @brief Construct a new Pizza:: Pizza object with copying image from BMP
+ *
+ * @param bmp
+ * @param colorTable 0=Color, 1=Grayscale, >1=Custom
+ */
+Pizza::Pizza(BMP bmp, int colorTable = 1) {
   m_width = bmp.getWidth();
   m_height = bmp.getHeight();
 
-  m_pixels = new Color *[m_width];
+  if (colorTable)
+    copyColorTable(DEFAULT_GRAYSCALE_TABLE, m_colorTable);
+  else
+    copyColorTable(DEFAULT_COLOR_TABLE, m_colorTable);
+
+  m_pixels = new uint8_t *[m_width];
   for (int i = 0; i < m_width; ++i) {
-    m_pixels[i] = new Color[m_height];
+    m_pixels[i] = new uint8_t[m_height];
     for (int j = 0; j < m_height; ++j) {
-      m_pixels[i][j] = bmp.getPixel(i, j);
+      m_pixels[i][j] =
+          findClosestColorIndexFromTable(bmp.getPixel(i, j), m_colorTable, 64);
     }
   }
 }
 
+/**
+ * @brief loads image from file
+ *
+ * @param name fileName
+ */
 void Pizza::loadFromFile(std::string name) {
   std::fstream file;
   file.open(name, std::ios::in | std::ios::binary);
@@ -52,18 +86,17 @@ void Pizza::loadFromFile(std::string name) {
     file.seekg(204, file.beg); // Skip to pixel table
   } else {
     file.seekg(12, file.beg); // Skip to pixel table
-    if (colorTableType == 0)  // Set default color table as current
-      std::copy(std::begin(DEFAULT_COLOR_TABLE), std::end(DEFAULT_COLOR_TABLE),
-                m_colorTable);
+
+    if (colorTableType == 0) // Set default color table as current
+      copyColorTable(DEFAULT_COLOR_TABLE, m_colorTable);
     else // Set default grayscale table as current
-      std::copy(std::begin(DEFAULT_GRAYSCALE_TABLE),
-                std::end(DEFAULT_GRAYSCALE_TABLE), m_colorTable);
+      copyColorTable(DEFAULT_GRAYSCALE_TABLE, m_colorTable);
   }
 
   // Declaring pixels array
-  m_pixels = new Color *[m_width];
+  m_pixels = new uint8_t *[m_width];
   for (int i = 0; i < m_width; i++) {
-    m_pixels[i] = new Color[m_height];
+    m_pixels[i] = new uint8_t[m_height];
   }
 
   // Getting pixels from file
@@ -85,7 +118,7 @@ void Pizza::loadFromFile(std::string name) {
       g = (data[(j * 6 + 2) / 8] >> (j * 6 + 2) % 8) & 0x02;
       r = (data[(j * 6 + 4) / 8] >> (j * 6 + 4) % 8) & 0x02;
       // Get matching color from color table
-      m_pixels[j][i] = m_colorTable[16 * r + 4 * g + b];
+      m_pixels[j][i] = 16 * r + 4 * g + b;
     }
   }
 
@@ -93,15 +126,10 @@ void Pizza::loadFromFile(std::string name) {
   file.close();
 }
 
-void Pizza::convertColorTo6bit() {
-  for (int i = 0; i < m_width; ++i) {
-    for (int j = 0; j < m_height; ++j) {
-      m_pixels[i][j] = DEFAULT_COLOR_TABLE[findClosestColorIndexFromTable(
-          m_pixels[i][j], DEFAULT_COLOR_TABLE, 64)];
-    }
-  }
-}
-
+/**
+ * @brief Destroy the Pizza:: Pizza object
+ *
+ */
 Pizza::~Pizza() {
   delete[] m_colorTable;
   for (int i = 0; i < m_width; ++i) {

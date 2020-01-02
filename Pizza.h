@@ -14,19 +14,18 @@ class Pizza {
 public:
   PizzaHeader m_header;
   Color *m_colorTable;
-  Color **m_pixels;
+  uint8_t **m_pixels;
   int m_width;
   int m_height;
 
 public:
-  Pizza(int width, int height);
+  Pizza(int width, int height, int colorTable = 0);
   Pizza(std::string name);
-  Pizza(BMP bmp);
+  Pizza(BMP bmp, int colorTable = 1);
   void loadFromFile(std::string name);
   int getWidth() { return m_width; }
   int getHeight() { return m_height; }
-  Color getPixel(int x, int y) { return m_pixels[x][y]; };
-  void convertColorTo6bit();
+  Color getPixel(int x, int y) { return m_colorTable[m_pixels[x][y]]; };
   ~Pizza();
 };
 

@@ -3,6 +3,12 @@
 #include <exception>
 #include <iostream>
 
+/**
+ * @brief Construct a new BMP::BMP object
+ *
+ * @param width
+ * @param height
+ */
 BMP::BMP(uint32_t width, uint32_t height)
     : m_width(width), m_height(height), m_pixels(new Color *[width]) {
   for (int i = 0; 0 < width; ++i) {
@@ -10,8 +16,18 @@ BMP::BMP(uint32_t width, uint32_t height)
   }
 };
 
+/**
+ * @brief Construct a new BMP::BMP object with loading from file initiated
+ *
+ * @param name File name
+ */
 BMP::BMP(std::string name) { loadFromFile(name); }
 
+/**
+ * @brief Construct a new BMP::BMP object copying from Pizza object
+ *
+ * @param pizza
+ */
 BMP::BMP(Pizza pizza) {
   m_width = pizza.getWidth();
   m_height = pizza.getHeight();
@@ -25,6 +41,11 @@ BMP::BMP(Pizza pizza) {
   }
 }
 
+/**
+ * @brief loads image from file
+ *
+ * @param name File Name
+ */
 void BMP::loadFromFile(std::string name) {
   std::fstream file;
   file.open(name, std::ios::in | std::ios::binary);
@@ -78,7 +99,12 @@ void BMP::loadFromFile(std::string name) {
   file.close();
 }
 
-// Saving int to char, little endian safe
+/**
+ * @brief Saving int to char, little endian safe
+ *
+ * @param a
+ * @param number
+ */
 void saveIntToChar(unsigned char *a, int number) {
   a[0] = number & 0xff;
   a[1] = (number >> 8) & 0xff;
@@ -86,6 +112,11 @@ void saveIntToChar(unsigned char *a, int number) {
   a[3] = (number >> 24) & 0xff;
 }
 
+/**
+ * @brief Saves image to file
+ *
+ * @param name File name
+ */
 void BMP::saveToFile(std::string name) {
   std::fstream file;
   file.open(name, std::ios::out | std::ios::binary);
@@ -122,11 +153,22 @@ void BMP::saveToFile(std::string name) {
   file.close();
 }
 
+/**
+ * @brief return Color from given pixel
+ *
+ * @param x
+ * @param y
+ * @return Color
+ */
 Color BMP::getPixel(int x, int y) {
   if (x < m_width && y < m_height)
     return m_pixels[x][y];
 }
 
+/**
+ * @brief Destroy the BMP::BMP object
+ *
+ */
 BMP::~BMP() {
   for (int i = 0; i < m_width; ++i) {
     delete[] m_pixels[i];

@@ -26,4 +26,6 @@ void convertStringToColor(std::string input, Color **image, int imageWidth,
 
 uint8_t getMinimumNumberOfBits(std::list<int> data);
 
+void copyColorTable(const Color *source, Color *destination);
+
 #endif
