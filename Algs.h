@@ -17,7 +17,7 @@ int findClosestColorIndexFromTable(Color color, const Color *colorTable,
 std::vector<Color> generate6BitColorTable(Color **image, int imageWidth,
                                           int imageHeight);
 
-std::list<int> generateLZWCompressedImage(Color **image, int imageWidth,
+std::list<int> generateLZWCompressedImage(uint8_t **image, int imageWidth,
                                           int imageHeight);
 
 std::string decompressLZWImage(std::list<int> compressed);

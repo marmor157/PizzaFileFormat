@@ -118,13 +118,13 @@ std::vector<Color> generate6BitColorTable(Color **image, int imageWidth,
  * @param imageHeight
  * @return std::list<int>
  */
-std::list<int> generateLZWCompressedImage(Color **image, int imageWidth,
+std::list<int> generateLZWCompressedImage(uint8_t **image, int imageWidth,
                                           int imageHeight) {
   std::map<std::string, int> dictionary;
 
-  // Initializing dictionary with values from 0 to 255
-  int dictSize = 256;
-  for (int i = 0; i < 256; ++i) {
+  // Initializing dictionary with values from 0 to 64, 6bit
+  int dictSize = 64;
+  for (int i = 0; i < 64; ++i) {
     dictionary[std::string(1, i)] = i;
   }
 
@@ -132,7 +132,7 @@ std::list<int> generateLZWCompressedImage(Color **image, int imageWidth,
   std::string uncompressed;
   for (int i = 0; i < imageWidth; ++i) {
     for (int j = 0; j < imageHeight; ++j) {
-      uncompressed += image[i][j].toString();
+      uncompressed += image[i][j];
     }
   }
   // delcaration of variable used in algorithm
@@ -169,9 +169,9 @@ std::list<int> generateLZWCompressedImage(Color **image, int imageWidth,
 std::string decompressLZWImage(std::list<int> compressed) {
   std::map<int, std::string> dictionary;
 
-  // Initializing dictionary with values from 0 to 255
-  int dictSize = 256;
-  for (int i = 0; i < 256; ++i) {
+  // Initializing dictionary with values from 0 to 64, 6bit
+  int dictSize = 64;
+  for (int i = 0; i < 64; ++i) {
     dictionary[i] = std::string(1, i);
   }
 
