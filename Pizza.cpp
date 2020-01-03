@@ -1,5 +1,6 @@
 #include "Pizza.h"
 #include "Algs.h"
+#include <iostream>
 
 /**
  * @brief Construct a new Pizza:: Pizza object
@@ -8,11 +9,14 @@
  * @param height
  * @param colorTable 0=Color, 1=Grayscale, >1=Custom
  */
-Pizza::Pizza(int width, int height, int colorTable = 0)
+Pizza::Pizza(int width, int height, int colorTable)
     : m_width(width), m_height(height), m_pixels(new uint8_t *[width]) {
   for (int i = 0; i < width; ++i) {
     m_pixels[i] = new uint8_t[height];
   }
+
+  m_header.colorTableAndCRC |=
+      (colorTable << 6); // set two most important bits to color Table value
 
   if (colorTable)
     copyColorTable(DEFAULT_GRAYSCALE_TABLE, m_colorTable);
@@ -33,9 +37,14 @@ Pizza::Pizza(std::string name) { loadFromFile(name); }
  * @param bmp
  * @param colorTable 0=Color, 1=Grayscale, >1=Custom
  */
-Pizza::Pizza(BMP bmp, int colorTable = 1) {
+Pizza::Pizza(BMP &bmp, int colorTable) {
   m_width = bmp.getWidth();
   m_height = bmp.getHeight();
+
+  m_colorTable = new Color[64];
+
+  m_header.colorTableAndCRC |=
+      (colorTable << 6); // set two most important bits to color Table value
 
   if (colorTable)
     copyColorTable(DEFAULT_GRAYSCALE_TABLE, m_colorTable);
@@ -123,6 +132,41 @@ void Pizza::loadFromFile(std::string name) {
   }
 
   delete[] data;
+  file.close();
+}
+
+void Pizza::saveToFile(std::string name) {
+  std::fstream file;
+  file.open(name, std::ios::out | std::ios::binary);
+
+  m_header.width = m_width;
+  m_header.height = m_height;
+
+  std::list<int> compressed =
+      generateLZWCompressedImage(m_pixels, m_width, m_height);
+
+  m_header.LZWWordLength = getMinimumNumberOfBits(compressed);
+
+  file.write((char *)&m_header, 11);
+
+  // If custom color table is provided
+  if ((m_header.colorTableAndCRC >> 6) >= 2) {
+    unsigned char data[192];
+    for (int i = 0; i < 64; ++i) {
+      data[i * 3] = (char)m_colorTable[i].r;
+      data[i * 3 + 1] = (char)m_colorTable[i].r;
+      data[i * 3 + 2] = (char)m_colorTable[i].r;
+    }
+    file.write((char *)&data, 192);
+  }
+
+  for (auto it = compressed.begin(); it != compressed.end(); ++it) {
+    for (int x = m_header.LZWWordLength - 1; x >= 0; --x) {
+      writeBit(file, (*it >> x) & 0x01);
+    }
+  }
+
+  writeBit(file, 0, 1); // Force write remaining bits
   file.close();
 }
 

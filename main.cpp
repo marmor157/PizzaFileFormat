@@ -7,10 +7,11 @@ using namespace std;
 
 int main() {
   BMP test("obrazek4.bmp");
+  Pizza pizza(test, 1);
+  pizza.saveToFile("obrazek321.pizza");
+  std::cout << pizza.getPixel(0, 0).r << std::endl;
 
-  test.saveToFile("obrazek321.bmp");
-
-  std::list<int> compressed =
+  /*std::list<int> compressed =
       generateLZWCompressedImage(test.m_pixels, test.m_width, test.m_height);
 
   std::string decompressed = decompressLZWImage(compressed);
@@ -18,7 +19,7 @@ int main() {
   convertStringToColor(decompressed, test.m_pixels, test.m_width,
                        test.m_height);
 
-  test.saveToFile("obrazek32.bmp");
+  test.saveToFile("obrazek32.bmp");*/
 
   return 1;
 }

@@ -21,8 +21,9 @@ public:
 public:
   Pizza(int width, int height, int colorTable = 0);
   Pizza(std::string name);
-  Pizza(BMP bmp, int colorTable = 1);
+  Pizza(BMP &bmp, int colorTable = 1);
   void loadFromFile(std::string name);
+  void saveToFile(std::string name);
   int getWidth() { return m_width; }
   int getHeight() { return m_height; }
   Color getPixel(int x, int y) { return m_colorTable[m_pixels[x][y]]; };
