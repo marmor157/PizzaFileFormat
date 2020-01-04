@@ -139,8 +139,8 @@ void BMP::saveToFile(std::string name) {
   unsigned char *data = new unsigned char[size];
 
   // Saving rom bottom row to the first
-  for (int i = m_height - 1; i >= 0; i--) {
-    for (int j = 0; j < m_width; j++) {
+  for (int i = m_height - 1; i >= 0; --i) {
+    for (int j = 0; j < m_width; ++j) {
       // save in reverse order, little endian
       data[j * 3] = (char)m_pixels[j][i].b;
       data[j * 3 + 1] = (char)m_pixels[j][i].g;

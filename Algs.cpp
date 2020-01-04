@@ -189,7 +189,7 @@ std::string decompressLZWImage(std::list<int> compressed) {
     else if (current == dictSize) {
       entry = previous + previous[0];
     } else
-      throw "Bad compressed list";
+      throw std::runtime_error("Bad compression of data");
 
     retVal += entry;
     dictionary[dictSize++] = previous + entry[0];
@@ -258,22 +258,21 @@ void copyColorTable(const Color *source, Color *destination) {
 }
 
 void writeBit(std::fstream &file, int bit, bool force) {
-  static int current_bit = 0;
+  static int current_bit = 8;
   static unsigned char bit_buffer;
 
   if (force) {
-    bit_buffer <<= 8 - current_bit;
-    current_bit = 7;
+    current_bit = 1;
   }
 
   if (bit)
-    bit_buffer |= (1 << current_bit);
+    bit_buffer |= (1 << current_bit - 1);
 
-  ++current_bit;
+  --current_bit;
 
-  if (current_bit == 8) {
+  if (current_bit == 0) {
     file.write((char *)&bit_buffer, 1);
-    current_bit = 0;
+    current_bit = 8;
     bit_buffer = 0;
   }
 }

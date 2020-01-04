@@ -6,10 +6,12 @@
 using namespace std;
 
 int main() {
-  BMP test("obrazek4.bmp");
-  Pizza pizza(test, 1);
+  BMP test("obrazek2.bmp");
+  Pizza pizza(test);
   pizza.saveToFile("obrazek321.pizza");
-  std::cout << pizza.getPixel(0, 0).r << std::endl;
+  Pizza pizza2("obrazek321.pizza");
+  BMP test2(pizza2);
+  test2.saveToFile("obrazek312.bmp");
 
   /*std::list<int> compressed =
       generateLZWCompressedImage(test.m_pixels, test.m_width, test.m_height);

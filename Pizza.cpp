@@ -1,5 +1,7 @@
 #include "Pizza.h"
 #include "Algs.h"
+#include <cmath>
+#include <cstring>
 #include <iostream>
 
 /**
@@ -68,11 +70,18 @@ Pizza::Pizza(BMP &bmp, int colorTable) {
  */
 void Pizza::loadFromFile(std::string name) {
   std::fstream file;
-  file.open(name, std::ios::in | std::ios::binary);
+  // We open the file at the end so we are able to determine its size
+  file.open(name, std::ios::in | std::ios::binary | std::ios::ate);
+
+  std::fstream::pos_type fileSize = file.tellg();
+  int dataSize = fileSize - 11;
+
+  // Aftrer reading the size, we have to reset position to the start
+  file.seekg(0);
 
   file.read((char *)&m_header, 11);
 
-  if (m_header.signature != "PIZZA") {
+  if (strcmp(m_header.signature, "PIZZA") != 0) {
     throw std::runtime_error("Error! Unrecognized file format.");
   }
 
@@ -81,8 +90,10 @@ void Pizza::loadFromFile(std::string name) {
 
   int colorTableType = m_header.colorTableAndCRC >> 6;
 
+  m_colorTable = new Color[64];
   if (colorTableType >= 2) {
     m_colorTable = new Color[64];
+    dataSize -= 192;
 
     unsigned char colorTableChar[192]; // 64 color, 24 bit for one
     file.read((char *)&colorTableChar, 192);
@@ -92,9 +103,9 @@ void Pizza::loadFromFile(std::string name) {
                               colorTableChar[i * 3 + 2]};
     }
 
-    file.seekg(204, file.beg); // Skip to pixel table
+    file.seekg(203, file.beg); // Skip to pixel table
   } else {
-    file.seekg(12, file.beg); // Skip to pixel table
+    file.seekg(11, file.beg); // Skip to pixel table
 
     if (colorTableType == 0) // Set default color table as current
       copyColorTable(DEFAULT_COLOR_TABLE, m_colorTable);
@@ -109,25 +120,40 @@ void Pizza::loadFromFile(std::string name) {
   }
 
   // Getting pixels from file
-  int size = m_header.LZWWordLength * m_width;
-  unsigned char *data = new unsigned char[size];
+  uint8_t *data = new uint8_t[dataSize];
 
-  uint8_t r, g, b;
+  file.read((char *)data, dataSize);
 
-  // Copying pixel data from file to Pixels array
-  for (int i = m_height - 1; i >= 0; --i) {
-    // Reading pixels from bottom left corner
-    file.read((char *)data, size); // read data every line, reading whole file
-                                   // could couse problems with largers images
+  int bitsLeft = m_header.LZWWordLength; // Bits left to add in current symbol
+  std::list<int> compressed(dataSize * 8 / m_header.LZWWordLength, 0);
+  std::list<int>::iterator it = compressed.begin();
 
-    for (int j = 0; j < m_width; ++j) {
-      // in order: blue, green, red (little endian)
-      // getting 2 bits for every color
-      b = (data[(j * 6) / 8] >> (j * 6) % 8) & 0x02;
-      g = (data[(j * 6 + 2) / 8] >> (j * 6 + 2) % 8) & 0x02;
-      r = (data[(j * 6 + 4) / 8] >> (j * 6 + 4) % 8) & 0x02;
-      // Get matching color from color table
-      m_pixels[j][i] = 16 * r + 4 * g + b;
+  for (int i = 0; i < dataSize; ++i) {
+    if (bitsLeft >= 8) {          // If we need all 8 bits from current char
+      bitsLeft -= 8;              // Substract if from current bits we need
+      *it |= data[i] << bitsLeft; // Then move bits up match their place
+    } else {                      // If we dont need whole char
+      *it |= data[i] >> (8 - bitsLeft); // Save number of bits we need
+      compressed.push_back(0);          // Add new element to list
+      ++it;                             // Make it current element
+
+      data[i] &=
+          ((2 << (7 - bitsLeft)) - 1); // Clear bits takeen by previous symbol
+
+      bitsLeft = m_header.LZWWordLength - 8 +
+                 bitsLeft; // Set new number of needed bits and substract left
+                           // from current char
+      *it |= data[i] << bitsLeft; // Save rest of bits from current char
+    }
+  }
+
+  std::string decompressed = decompressLZWImage(compressed);
+
+  std::string::iterator current = decompressed.begin();
+
+  for (int i = 0; i < m_width; ++i) {
+    for (int j = 0; j < m_height; ++j) {
+      m_pixels[i][j] = (uint8_t)*current++;
     }
   }
 
@@ -159,7 +185,7 @@ void Pizza::saveToFile(std::string name) {
     }
     file.write((char *)&data, 192);
   }
-
+  auto it = compressed.begin();
   for (auto it = compressed.begin(); it != compressed.end(); ++it) {
     for (int x = m_header.LZWWordLength - 1; x >= 0; --x) {
       writeBit(file, (*it >> x) & 0x01);

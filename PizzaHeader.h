@@ -9,8 +9,8 @@ struct PizzaHeader {
   uint16_t width;
   uint16_t height;
   uint8_t LZWWordLength;
-  uint8_t colorTableAndCRC; // 2 first bits describe type of color table, 6 bits
-                            // is CRC
+  uint8_t colorTableAndCRC{0}; // 2 first bits describe type of color table, 6
+                               // bits is CRC
 };
 #pragma pack(pop)
 

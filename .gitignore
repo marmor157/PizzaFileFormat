@@ -7,6 +7,7 @@ main
 main.out
 #Test images
 *.bmp
+*.pizza
 
 #macOS exlusive files
 .DS_Store
