@@ -6,7 +6,7 @@
 using namespace std;
 
 int main() {
-  BMP test("obrazek2.bmp");
+  BMP test("obrazek4.bmp");
   Pizza pizza(test);
   pizza.saveToFile("obrazek321.pizza");
   Pizza pizza2("obrazek321.pizza");

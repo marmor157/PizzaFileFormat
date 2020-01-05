@@ -21,7 +21,7 @@ public:
 public:
   Pizza(int width, int height, int colorTable = 0);
   Pizza(std::string name);
-  Pizza(BMP &bmp, int colorTable = 1);
+  Pizza(BMP &bmp, int colorTable = 0);
   void loadFromFile(std::string name);
   void saveToFile(std::string name);
   int getWidth() { return m_width; }

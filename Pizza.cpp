@@ -74,14 +74,14 @@ void Pizza::loadFromFile(std::string name) {
   file.open(name, std::ios::in | std::ios::binary | std::ios::ate);
 
   std::fstream::pos_type fileSize = file.tellg();
-  int dataSize = fileSize - 11;
+  int dataSize = fileSize - 8;
 
   // Aftrer reading the size, we have to reset position to the start
   file.seekg(0);
 
-  file.read((char *)&m_header, 11);
+  file.read((char *)&m_header, 8);
 
-  if (strcmp(m_header.signature, "PIZZA") != 0) {
+  if (m_header.signature != 0x4950) {
     throw std::runtime_error("Error! Unrecognized file format.");
   }
 
@@ -103,9 +103,9 @@ void Pizza::loadFromFile(std::string name) {
                               colorTableChar[i * 3 + 2]};
     }
 
-    file.seekg(203, file.beg); // Skip to pixel table
+    file.seekg(200, file.beg); // Skip to pixel table
   } else {
-    file.seekg(11, file.beg); // Skip to pixel table
+    file.seekg(8, file.beg); // Skip to pixel table
 
     if (colorTableType == 0) // Set default color table as current
       copyColorTable(DEFAULT_COLOR_TABLE, m_colorTable);
@@ -173,7 +173,7 @@ void Pizza::saveToFile(std::string name) {
 
   m_header.LZWWordLength = getMinimumNumberOfBits(compressed);
 
-  file.write((char *)&m_header, 11);
+  file.write((char *)&m_header, 8);
 
   // If custom color table is provided
   if ((m_header.colorTableAndCRC >> 6) >= 2) {
