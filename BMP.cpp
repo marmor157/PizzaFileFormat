@@ -28,7 +28,7 @@ BMP::BMP(std::string name) { loadFromFile(name); }
  *
  * @param pizza
  */
-BMP::BMP(Pizza pizza) {
+BMP::BMP(Pizza &pizza) {
   m_width = pizza.getWidth();
   m_height = pizza.getHeight();
 

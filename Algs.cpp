@@ -34,7 +34,7 @@ int getDifferenceInColors(Color color1, Color color2) {
  * @param colorTableSize
  * @return int
  */
-int findClosestColorIndexFromTable(Color color, const Color *colorTable,
+int findClosestColorIndexFromTable(Color color, std::vector<Color> colorTable,
                                    int colorTableSize) {
   int retVal = 0;
 
@@ -61,19 +61,18 @@ int findClosestColorIndexFromTable(Color color, const Color *colorTable,
  * @param imageHeight
  * @return std::vector<Color>
  */
-std::vector<Color> generate6BitColorTable(Color **image, int imageWidth,
-                                          int imageHeight) {
+std::vector<Color> generate6BitColorTable(BMP &bmp) {
   std::vector<Color> retVal;
   std::vector<int> occurrences;
 
-  for (int i = 0; i < imageWidth; ++i) {
-    for (int j = 0; j < imageHeight; ++j) {
-      auto index =
-          std::find(retVal.begin(), retVal.end(), image[i][j]) - retVal.begin();
+  for (int i = 0; i < bmp.getWidth(); ++i) {
+    for (int j = 0; j < bmp.getHeight(); ++j) {
+      auto index = std::find(retVal.begin(), retVal.end(), bmp.getPixel(i, j)) -
+                   retVal.begin();
       if (index != retVal.size())
         occurrences[index]++;
       else {
-        retVal.push_back(image[i][j]);
+        retVal.push_back(bmp.getPixel(i, j));
         occurrences.push_back(1);
       }
     }
@@ -98,10 +97,10 @@ std::vector<Color> generate6BitColorTable(Color **image, int imageWidth,
     color2Pos = color2 - retVal.begin();
 
     if (occurrences[color1Pos] >= occurrences[color2Pos]) {
-      occurrences[color1Pos] += occurrences[color2Pos];
+      // occurrences[color1Pos] += occurrences[color2Pos];
       retVal.erase(color2);
     } else {
-      occurrences[color2Pos] += occurrences[color1Pos];
+      // occurrences[color2Pos] += occurrences[color1Pos];
       retVal.erase(color1);
     }
     minDifference = 768;
@@ -253,8 +252,10 @@ uint8_t getMinimumNumberOfBits(std::list<int> data) {
  * @param source
  * @param destination
  */
-void copyColorTable(const Color *source, Color *destination) {
-  std::copy(source, source + 64, destination);
+void copyColorTableToVector(const Color *source,
+                            std::vector<Color> destination) {
+  destination.insert(destination.begin(), source, source + 64);
+  // std::copy(source, source + 64, destination);
 }
 
 void writeBit(std::fstream &file, int bit, bool force) {

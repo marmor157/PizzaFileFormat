@@ -7,11 +7,18 @@ using namespace std;
 
 int main() {
   BMP test("obrazek4.bmp");
-  Pizza pizza(test);
-  pizza.saveToFile("obrazek321.pizza");
-  Pizza pizza2("obrazek321.pizza");
-  BMP test2(pizza2);
-  test2.saveToFile("obrazek312.bmp");
+  // Pizza pizza(test, 0);
+  // Pizza pizza2(test, 1);
+  Pizza pizza3(test, 2);
+  pizza3.saveToFile("obrazek33.pizza");
+  Pizza tak("obrazek33.pizza");
+
+  // BMP bmp(pizza);
+  // BMP bmp2(pizza2);
+  BMP bmp3(tak);
+  // bmp.saveToFile("obrazek31.bmp");
+  // bmp2.saveToFile("obrazek32.bmp");
+  bmp3.saveToFile("obrazek33.bmp");
 
   /*std::list<int> compressed =
       generateLZWCompressedImage(test.m_pixels, test.m_width, test.m_height);

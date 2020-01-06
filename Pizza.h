@@ -7,13 +7,14 @@
 #include "PizzaHeader.h"
 #include <fstream>
 #include <string>
+#include <vector>
 
 class BMP;
 
 class Pizza {
 public:
   PizzaHeader m_header;
-  Color *m_colorTable;
+  std::vector<Color> m_colorTable;
   uint8_t **m_pixels;
   int m_width;
   int m_height;

@@ -20,10 +20,11 @@ Pizza::Pizza(int width, int height, int colorTable)
   m_header.colorTableAndCRC |=
       (colorTable << 6); // set two most important bits to color Table value
 
+  m_colorTable.resize(64);
   if (colorTable)
-    copyColorTable(DEFAULT_GRAYSCALE_TABLE, m_colorTable);
+    copyColorTableToVector(DEFAULT_GRAYSCALE_TABLE, m_colorTable);
   else
-    copyColorTable(DEFAULT_COLOR_TABLE, m_colorTable);
+    copyColorTableToVector(DEFAULT_COLOR_TABLE, m_colorTable);
 }
 
 /**
@@ -43,15 +44,17 @@ Pizza::Pizza(BMP &bmp, int colorTable) {
   m_width = bmp.getWidth();
   m_height = bmp.getHeight();
 
-  m_colorTable = new Color[64];
+  m_colorTable.resize(64);
 
   m_header.colorTableAndCRC |=
       (colorTable << 6); // set two most important bits to color Table value
 
-  if (colorTable)
-    copyColorTable(DEFAULT_GRAYSCALE_TABLE, m_colorTable);
+  if (colorTable >= 2) {
+    m_colorTable = generate6BitColorTable(bmp);
+  } else if (colorTable)
+    copyColorTableToVector(DEFAULT_GRAYSCALE_TABLE, m_colorTable);
   else
-    copyColorTable(DEFAULT_COLOR_TABLE, m_colorTable);
+    copyColorTableToVector(DEFAULT_COLOR_TABLE, m_colorTable);
 
   m_pixels = new uint8_t *[m_width];
   for (int i = 0; i < m_width; ++i) {
@@ -90,9 +93,9 @@ void Pizza::loadFromFile(std::string name) {
 
   int colorTableType = m_header.colorTableAndCRC >> 6;
 
-  m_colorTable = new Color[64];
+  m_colorTable.resize(64);
   if (colorTableType >= 2) {
-    m_colorTable = new Color[64];
+
     dataSize -= 192;
 
     unsigned char colorTableChar[192]; // 64 color, 24 bit for one
@@ -108,9 +111,9 @@ void Pizza::loadFromFile(std::string name) {
     file.seekg(8, file.beg); // Skip to pixel table
 
     if (colorTableType == 0) // Set default color table as current
-      copyColorTable(DEFAULT_COLOR_TABLE, m_colorTable);
+      copyColorTableToVector(DEFAULT_COLOR_TABLE, m_colorTable);
     else // Set default grayscale table as current
-      copyColorTable(DEFAULT_GRAYSCALE_TABLE, m_colorTable);
+      copyColorTableToVector(DEFAULT_GRAYSCALE_TABLE, m_colorTable);
   }
 
   // Declaring pixels array
@@ -180,8 +183,8 @@ void Pizza::saveToFile(std::string name) {
     unsigned char data[192];
     for (int i = 0; i < 64; ++i) {
       data[i * 3] = (char)m_colorTable[i].r;
-      data[i * 3 + 1] = (char)m_colorTable[i].r;
-      data[i * 3 + 2] = (char)m_colorTable[i].r;
+      data[i * 3 + 1] = (char)m_colorTable[i].g;
+      data[i * 3 + 2] = (char)m_colorTable[i].b;
     }
     file.write((char *)&data, 192);
   }
@@ -201,7 +204,6 @@ void Pizza::saveToFile(std::string name) {
  *
  */
 Pizza::~Pizza() {
-  delete[] m_colorTable;
   for (int i = 0; i < m_width; ++i) {
     delete[] m_pixels[i];
   }

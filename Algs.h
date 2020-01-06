@@ -7,15 +7,15 @@
 #include <string>
 #include <vector>
 
+#include "BMP.h"
 #include "Color.h"
 
 uint8_t RGBtoGrayscale(Color color);
 
-int findClosestColorIndexFromTable(Color color, const Color *colorTable,
+int findClosestColorIndexFromTable(Color color, std::vector<Color> colorTable,
                                    int colorTableSize);
 
-std::vector<Color> generate6BitColorTable(Color **image, int imageWidth,
-                                          int imageHeight);
+std::vector<Color> generate6BitColorTable(BMP &bmp);
 
 std::list<int> generateLZWCompressedImage(uint8_t **image, int imageWidth,
                                           int imageHeight);
@@ -27,7 +27,8 @@ void convertStringToColor(std::string input, Color **image, int imageWidth,
 
 uint8_t getMinimumNumberOfBits(std::list<int> data);
 
-void copyColorTable(const Color *source, Color *destination);
+void copyColorTableToVector(const Color *source,
+                            std::vector<Color> destination);
 
 void writeBit(std::fstream &file, int bit, bool force = 0);
 
