@@ -35,12 +35,17 @@ int getDifferenceInColors(Color color1, Color color2) {
  * @return int
  */
 int findClosestColorIndexFromTable(Color color, std::vector<Color> colorTable,
-                                   int colorTableSize) {
+                                   int colorTableSize, bool toGrayscale) {
   int retVal = 0;
 
   int minDifference = getDifferenceInColors(color, colorTable[0]);
 
   int difference;
+
+  if (toGrayscale) {
+    color.r = RGBtoGrayscale(color);
+    color.b = color.g = color.r;
+  }
 
   for (int i = 1; i < colorTableSize; i++) {
     difference = getDifferenceInColors(color, colorTable[i]);
@@ -253,7 +258,7 @@ uint8_t getMinimumNumberOfBits(std::list<int> data) {
  * @param destination
  */
 void copyColorTableToVector(const Color *source,
-                            std::vector<Color> destination) {
+                            std::vector<Color> &destination) {
   destination.insert(destination.begin(), source, source + 64);
   // std::copy(source, source + 64, destination);
 }

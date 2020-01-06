@@ -60,8 +60,8 @@ Pizza::Pizza(BMP &bmp, int colorTable) {
   for (int i = 0; i < m_width; ++i) {
     m_pixels[i] = new uint8_t[m_height];
     for (int j = 0; j < m_height; ++j) {
-      m_pixels[i][j] =
-          findClosestColorIndexFromTable(bmp.getPixel(i, j), m_colorTable, 64);
+      m_pixels[i][j] = findClosestColorIndexFromTable(
+          bmp.getPixel(i, j), m_colorTable, 64, colorTable == 1);
     }
   }
 }

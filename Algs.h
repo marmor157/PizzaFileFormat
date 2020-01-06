@@ -13,7 +13,7 @@
 uint8_t RGBtoGrayscale(Color color);
 
 int findClosestColorIndexFromTable(Color color, std::vector<Color> colorTable,
-                                   int colorTableSize);
+                                   int colorTableSize, bool toGrayscale = 0);
 
 std::vector<Color> generate6BitColorTable(BMP &bmp);
 
@@ -28,7 +28,7 @@ void convertStringToColor(std::string input, Color **image, int imageWidth,
 uint8_t getMinimumNumberOfBits(std::list<int> data);
 
 void copyColorTableToVector(const Color *source,
-                            std::vector<Color> destination);
+                            std::vector<Color> &destination);
 
 void writeBit(std::fstream &file, int bit, bool force = 0);
 
