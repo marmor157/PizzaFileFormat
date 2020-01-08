@@ -282,3 +282,90 @@ void writeBit(std::fstream &file, int bit, bool force) {
     bit_buffer = 0;
   }
 }
+
+std::vector<Color> sortColorsBySubcolor(std::vector<Color> &colors,
+                                        char subcolor) {
+  if (subcolor == 'r') {
+    std::sort(colors.begin(), colors.end(),
+              [](const Color &lhs, const Color &rhs) { return lhs.r > rhs.r; });
+  } else if (subcolor == 'g') {
+    std::sort(colors.begin(), colors.end(),
+              [](const Color &lhs, const Color &rhs) { return lhs.g > rhs.g; });
+  } else {
+    std::sort(colors.begin(), colors.end(),
+              [](const Color &lhs, const Color &rhs) { return lhs.b > rhs.b; });
+  }
+
+  return colors;
+}
+
+char findBiggestRange(std::vector<Color> colors) {
+  int rMin = 256, rMax = 0, gMin = 256, gMax = 0, bMin = 256, bMax = 0;
+
+  for (auto it = colors.begin(); it != colors.end(); ++it) {
+    rMin = std::min(rMin, (int)it->r);
+    rMax = std::max(rMax, (int)it->r);
+    gMin = std::min(gMin, (int)it->g);
+    gMax = std::max(gMax, (int)it->g);
+    bMin = std::min(bMin, (int)it->b);
+    bMax = std::max(bMax, (int)it->b);
+  }
+
+  const int rRange = rMax - rMin;
+  const int gRange = gMax - gMin;
+  const int bRange = bMax - bMin;
+
+  const int biggestRange = std::max(rRange, std::max(gRange, bRange));
+
+  if (biggestRange == rRange)
+    return 'r';
+  else if (biggestRange == gRange)
+    return 'g';
+  else
+    return 'b';
+}
+
+std::vector<Color> generate6BitColorTableMedianCut(BMP &bmp) {
+  std::vector<Color> retVal;
+
+  for (int i = 0; i < bmp.getWidth(); ++i) {
+    for (int j = 0; j < bmp.getHeight(); ++j) {
+      auto index = std::find(retVal.begin(), retVal.end(), bmp.getPixel(i, j));
+      if (index == retVal.end())
+        retVal.push_back(bmp.getPixel(i, j));
+    }
+  }
+
+  return medianCut(retVal, 0);
+}
+
+std::vector<Color> medianCut(std::vector<Color> colors, int depth,
+                             int maxDepth) {
+  if (depth == maxDepth) {
+    int r = 0, g = 0, b = 0;
+    for (auto it = colors.begin(); it != colors.end(); ++it) {
+      r += it->r;
+      g += it->g;
+      b += it->b;
+    }
+    r = r / colors.size();
+    g = g / colors.size();
+    b = b / colors.size();
+    return std::vector<Color>(1, Color{r, g, b});
+  }
+
+  const char subcolorToSortBy = findBiggestRange(colors);
+  sortColorsBySubcolor(colors, subcolorToSortBy);
+
+  std::size_t const half_size = colors.size() / 2;
+  std::vector<Color> left =
+      std::vector<Color>(colors.begin(), colors.begin() + half_size);
+  std::vector<Color> right =
+      std::vector<Color>(colors.begin() + half_size, colors.end());
+
+  left = medianCut(left, depth + 1, maxDepth);
+  right = medianCut(right, depth + 1, maxDepth);
+
+  left.insert(left.end(), right.begin(), right.end());
+  return left;
+}

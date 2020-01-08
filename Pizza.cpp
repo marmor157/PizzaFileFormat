@@ -50,7 +50,7 @@ Pizza::Pizza(BMP &bmp, int colorTable) {
       (colorTable << 6); // set two most important bits to color Table value
 
   if (colorTable >= 2) {
-    m_colorTable = generate6BitColorTable(bmp);
+    m_colorTable = generate6BitColorTableMedianCut(bmp);
   } else if (colorTable)
     copyColorTableToVector(DEFAULT_GRAYSCALE_TABLE, m_colorTable);
   else

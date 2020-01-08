@@ -32,4 +32,14 @@ void copyColorTableToVector(const Color *source,
 
 void writeBit(std::fstream &file, int bit, bool force = 0);
 
+std::vector<Color> sortColorsBySubcolor(std::vector<Color> &colors,
+                                        char subcolor);
+
+char findBiggestRange(std::vector<Color> colors);
+
+std::vector<Color> generate6BitColorTableMedianCut(BMP &bmp);
+
+std::vector<Color> medianCut(std::vector<Color> colors, int depth,
+                             int maxDepth = 6); // Default 64 colors
+
 #endif
