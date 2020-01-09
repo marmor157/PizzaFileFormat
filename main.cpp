@@ -6,10 +6,10 @@
 using namespace std;
 
 int main() {
-  BMP test("obrazek4.bmp");
+  BMP test("obrazek2a.bmp");
   // Pizza pizza(test, 0);
   // Pizza pizza2(test, 1);
-  Pizza pizza3(test, 2);
+  Pizza pizza3(test, 0);
   pizza3.saveToFile("obrazek33.pizza");
   Pizza tak("obrazek33.pizza");
 

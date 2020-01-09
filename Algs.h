@@ -13,7 +13,7 @@
 uint8_t RGBtoGrayscale(Color color);
 
 int findClosestColorIndexFromTable(Color color, std::vector<Color> colorTable,
-                                   int colorTableSize, bool toGrayscale = 0);
+                                   bool toGrayscale = 0);
 
 std::vector<Color> generate6BitColorTable(BMP &bmp);
 
@@ -41,5 +41,7 @@ std::vector<Color> generate6BitColorTableMedianCut(BMP &bmp);
 
 std::vector<Color> medianCut(std::vector<Color> colors, int depth,
                              int maxDepth = 6); // Default 64 colors
+
+void applyDithering(BMP &bmp, std::vector<Color> &colorTable);
 
 #endif

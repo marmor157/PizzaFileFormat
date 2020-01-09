@@ -35,7 +35,7 @@ int getDifferenceInColors(Color color1, Color color2) {
  * @return int
  */
 int findClosestColorIndexFromTable(Color color, std::vector<Color> colorTable,
-                                   int colorTableSize, bool toGrayscale) {
+                                   bool toGrayscale) {
   int retVal = 0;
 
   int minDifference = getDifferenceInColors(color, colorTable[0]);
@@ -47,7 +47,7 @@ int findClosestColorIndexFromTable(Color color, std::vector<Color> colorTable,
     color.b = color.g = color.r;
   }
 
-  for (int i = 1; i < colorTableSize; i++) {
+  for (int i = 1; i < colorTable.size(); i++) {
     difference = getDifferenceInColors(color, colorTable[i]);
 
     if (difference < minDifference) {
@@ -368,4 +368,72 @@ std::vector<Color> medianCut(std::vector<Color> colors, int depth,
 
   left.insert(left.end(), right.begin(), right.end());
   return left;
+}
+
+void applyDithering(BMP &bmp, std::vector<Color> &colorTable) {
+  Color currentPixel;
+  Color choosenColor;
+
+  float **errorsR = new float *[bmp.getWidth() + 2];
+  float **errorsG = new float *[bmp.getWidth() + 2];
+  float **errorsB = new float *[bmp.getWidth() + 2];
+
+  for (int i = 0; i < bmp.getWidth() + 2; ++i) {
+    errorsR[i] = new float[bmp.getHeight() + 2]{0};
+    errorsG[i] = new float[bmp.getHeight() + 2]{0};
+    errorsB[i] = new float[bmp.getHeight() + 2]{0};
+  }
+
+  int shift = 1; // To not exceed table range
+  float currentErrorR = 0, currentErrorG = 0, currentErrorB = 0;
+
+  for (int y = 0; y < bmp.getHeight(); y++)
+    for (int x = 0; x < bmp.getWidth(); x++) {
+      currentPixel = bmp.getPixel(x, y);
+
+      if (currentPixel.r + errorsR[x + shift][y] > 255)
+        currentPixel.r = 255;
+      else if (currentPixel.r + errorsR[x + shift][y] < 0)
+        currentPixel.r = 0;
+      else
+        currentPixel.r += errorsR[x + shift][y];
+
+      if (currentPixel.g + errorsG[x + shift][y] > 255)
+        currentPixel.g = 255;
+      else if (currentPixel.r + errorsG[x + shift][y] < 0)
+        currentPixel.g = 0;
+      else
+        currentPixel.g += errorsG[x + shift][y];
+
+      if (currentPixel.b + errorsB[x + shift][y] > 255)
+        currentPixel.b = 255;
+      else if (currentPixel.b + errorsB[x + shift][y] < 0)
+        currentPixel.b = 0;
+      else
+        currentPixel.b += errorsB[x + shift][y];
+
+      choosenColor =
+          colorTable[findClosestColorIndexFromTable(currentPixel, colorTable)];
+
+      currentErrorR = currentPixel.r - choosenColor.r;
+      currentErrorG = currentPixel.g - choosenColor.g;
+      currentErrorB = currentPixel.b - choosenColor.b;
+
+      bmp.setPixel(x, y, choosenColor);
+
+      errorsR[x + 1 + shift][y] += (currentErrorR * 7.0 / 16.0);
+      errorsR[x + 1 + shift][y + 1] += (currentErrorR * 1.0 / 16.0);
+      errorsR[x + shift][y + 1] += (currentErrorR * 5.0 / 16.0);
+      errorsR[x - 1 + shift][y + 1] += (currentErrorR * 3.0 / 16.0);
+
+      errorsG[x + 1 + shift][y] += (currentErrorG * 7.0 / 16.0);
+      errorsG[x + 1 + shift][y + 1] += (currentErrorG * 1.0 / 16.0);
+      errorsG[x + shift][y + 1] += (currentErrorG * 5.0 / 16.0);
+      errorsG[x - 1 + shift][y + 1] += (currentErrorG * 3.0 / 16.0);
+
+      errorsB[x + 1 + shift][y] += (currentErrorB * 7.0 / 16.0);
+      errorsB[x + 1 + shift][y + 1] += (currentErrorB * 1.0 / 16.0);
+      errorsB[x + shift][y + 1] += (currentErrorB * 5.0 / 16.0);
+      errorsB[x - 1 + shift][y + 1] += (currentErrorB * 3.0 / 16.0);
+    }
 }

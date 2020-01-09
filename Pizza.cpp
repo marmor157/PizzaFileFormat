@@ -56,12 +56,14 @@ Pizza::Pizza(BMP &bmp, int colorTable) {
   else
     copyColorTableToVector(DEFAULT_COLOR_TABLE, m_colorTable);
 
+  applyDithering(bmp, m_colorTable);
+
   m_pixels = new uint8_t *[m_width];
   for (int i = 0; i < m_width; ++i) {
     m_pixels[i] = new uint8_t[m_height];
     for (int j = 0; j < m_height; ++j) {
       m_pixels[i][j] = findClosestColorIndexFromTable(
-          bmp.getPixel(i, j), m_colorTable, 64, colorTable == 1);
+          bmp.getPixel(i, j), m_colorTable, colorTable == 1);
     }
   }
 }
