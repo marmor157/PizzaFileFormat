@@ -27,7 +27,7 @@ public:
   uint32_t getWidth() { return m_width; }
   uint32_t getHeight() { return m_height; }
   Color getPixel(int i, int j);
-  void setPixel(int x, int y, Color kolor);
+  void setPixel(int x, int y, Color color);
   ~BMP();
 };
 

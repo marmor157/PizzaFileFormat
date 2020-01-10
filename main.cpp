@@ -6,29 +6,57 @@
 using namespace std;
 
 int main() {
-  BMP test("obrazek2a.bmp");
-  // Pizza pizza(test, 0);
-  // Pizza pizza2(test, 1);
-  Pizza pizza3(test, 0);
-  pizza3.saveToFile("obrazek33.pizza");
-  Pizza tak("obrazek33.pizza");
+  int conrersionType;
+  string inputFile, outputFile;
+  cout << "Choose conversion type" << endl;
+  cout << "1. BMP -> Pizza" << endl;
+  cout << "2. Pizza -> BMP" << endl;
+  cin >> conrersionType;
+  if (conrersionType == 1) {
+    cout << "Insert input file name(with extension)" << endl;
+    cin >> inputFile;
 
-  // BMP bmp(pizza);
-  // BMP bmp2(pizza2);
-  BMP bmp3(tak);
-  // bmp.saveToFile("obrazek31.bmp");
-  // bmp2.saveToFile("obrazek32.bmp");
-  bmp3.saveToFile("obrazek33.bmp");
+    BMP bmp(inputFile);
 
-  /*std::list<int> compressed =
-      generateLZWCompressedImage(test.m_pixels, test.m_width, test.m_height);
+    int dithering, colorTableType, algType = 0;
 
-  std::string decompressed = decompressLZWImage(compressed);
+    cout << "Choose option" << endl;
+    cout << "0.Dithering OFF" << endl;
+    cout << "1.Dithering ON" << endl;
+    cin >> dithering;
 
-  convertStringToColor(decompressed, test.m_pixels, test.m_width,
-                       test.m_height);
+    cout << "Choose color table type" << endl;
+    cout << "0.Default Color" << endl;
+    cout << "1.Default Grayscale" << endl;
+    cout << "2.Dedicated Color" << endl;
+    cin >> colorTableType;
 
-  test.saveToFile("obrazek32.bmp");*/
+    if (colorTableType == 2) {
+      cout << "Choose color table converions type" << endl;
+      cout << "0.Median Cut" << endl;
+      cout << "1.Brute Force(can be very slow when image has a lot of colors)"
+           << endl;
+      cin >> algType;
+    }
+
+    Pizza pizza(bmp, colorTableType, dithering, algType);
+
+    cout << "Insert output file name(with extenison)" << endl;
+    cin >> outputFile;
+
+    pizza.saveToFile(outputFile);
+  } else {
+    cout << "Insert input file name(with extension)" << endl;
+    cin >> inputFile;
+
+    Pizza pizza(inputFile);
+    BMP bmp(pizza);
+
+    cout << "Insert output file name(with extenison)" << endl;
+    cin >> outputFile;
+
+    bmp.saveToFile(outputFile);
+  }
 
   return 1;
 }

@@ -165,9 +165,16 @@ Color BMP::getPixel(int x, int y) {
     return m_pixels[x][y];
 }
 
-void BMP::setPixel(int x, int y, Color kolor) {
+/**
+ * @brief Sets pixel for given Color
+ *
+ * @param x
+ * @param y
+ * @param kolor
+ */
+void BMP::setPixel(int x, int y, Color color) {
   if (x >= 0 && x < m_width && y >= 0 && y < m_height)
-    m_pixels[x][y] = kolor;
+    m_pixels[x][y] = color;
 }
 
 /**

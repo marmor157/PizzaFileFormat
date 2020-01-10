@@ -1,8 +1,4 @@
 #include "Algs.h"
-#include <algorithm>
-#include <cstdint>
-#include <iostream>
-#include <map>
 
 /**
  * @brief converts RGB value to grayscale
@@ -12,106 +8,6 @@
  */
 uint8_t RGBtoGrayscale(Color color) {
   return 0.299 * color.r + 0.587 * color.g + 0.114 * color.b;
-}
-
-/**
- * @brief Get the Difference In Colors object values
- *
- * @param color1
- * @param color2
- * @return int
- */
-int getDifferenceInColors(Color color1, Color color2) {
-  return abs(color1.r - color2.r) + abs(color1.g - color2.g) +
-         abs(color1.b - color2.b);
-}
-
-/**
- * @brief Returs index of Color closest to given one in given Color Table
- *
- * @param color
- * @param colorTable
- * @param colorTableSize
- * @return int
- */
-int findClosestColorIndexFromTable(Color color, std::vector<Color> colorTable,
-                                   bool toGrayscale) {
-  int retVal = 0;
-
-  int minDifference = getDifferenceInColors(color, colorTable[0]);
-
-  int difference;
-
-  if (toGrayscale) {
-    color.r = RGBtoGrayscale(color);
-    color.b = color.g = color.r;
-  }
-
-  for (int i = 1; i < colorTable.size(); i++) {
-    difference = getDifferenceInColors(color, colorTable[i]);
-
-    if (difference < minDifference) {
-      retVal = i;
-      minDifference = difference;
-    }
-  }
-  return retVal;
-}
-
-/**
- * @brief Generates custom 6 bit color table for best image reproduction
- *
- * @param image Two dimensional array of Colors, image[width][height]
- * @param imageWidth
- * @param imageHeight
- * @return std::vector<Color>
- */
-std::vector<Color> generate6BitColorTable(BMP &bmp) {
-  std::vector<Color> retVal;
-  std::vector<int> occurrences;
-
-  for (int i = 0; i < bmp.getWidth(); ++i) {
-    for (int j = 0; j < bmp.getHeight(); ++j) {
-      auto index = std::find(retVal.begin(), retVal.end(), bmp.getPixel(i, j)) -
-                   retVal.begin();
-      if (index != retVal.size())
-        occurrences[index]++;
-      else {
-        retVal.push_back(bmp.getPixel(i, j));
-        occurrences.push_back(1);
-      }
-    }
-  }
-
-  int minDifference = 768;
-  std::vector<Color>::iterator color1, color2;
-  int color1Pos, color2Pos;
-
-  while (retVal.size() > 64) {
-    for (auto i = retVal.begin(); i != retVal.end(); i++) {
-      for (auto j = std::next(i, 1); j != retVal.end(); j++) {
-        int difference = getDifferenceInColors(*i, *j);
-        if (difference < minDifference) {
-          minDifference = difference;
-          color1 = i;
-          color2 = j;
-        }
-      }
-    }
-    color1Pos = color1 - retVal.begin();
-    color2Pos = color2 - retVal.begin();
-
-    if (occurrences[color1Pos] >= occurrences[color2Pos]) {
-      // occurrences[color1Pos] += occurrences[color2Pos];
-      retVal.erase(color2);
-    } else {
-      // occurrences[color2Pos] += occurrences[color1Pos];
-      retVal.erase(color1);
-    }
-    minDifference = 768;
-  }
-
-  return retVal;
 }
 
 /**
@@ -205,28 +101,6 @@ std::string decompressLZWImage(std::list<int> compressed) {
 }
 
 /**
- * @brief Converts decompressed string to 2D array of Colors
- *
- * @param input
- * @param image Two dimensional array of Colors, image[width][height]
- * @param imageWidth
- * @param imageHeight
- */
-void convertStringToColor(std::string input, Color **image, int imageWidth,
-                          int imageHeight) {
-
-  std::string::iterator current = input.begin();
-
-  for (int i = 0; i < imageWidth; ++i) {
-    for (int j = 0; j < imageHeight; ++j) {
-      image[i][j].r = (uint8_t)*current++;
-      image[i][j].g = (uint8_t)*current++;
-      image[i][j].b = (uint8_t)*current++;
-    }
-  }
-}
-
-/**
  * @brief Get the Minimum Number Of Bits per value needed to save given data
  *
  * @param data
@@ -252,17 +126,12 @@ uint8_t getMinimumNumberOfBits(std::list<int> data) {
 }
 
 /**
- * @brief copies color table to another
+ * @brief Stores bits and saves to file when whole byte is ready
  *
- * @param source
- * @param destination
+ * @param file file to save to
+ * @param bit current bit value
+ * @param force if given saves current bits, rest of byte is filled with 0
  */
-void copyColorTableToVector(const Color *source,
-                            std::vector<Color> &destination) {
-  destination.insert(destination.begin(), source, source + 64);
-  // std::copy(source, source + 64, destination);
-}
-
 void writeBit(std::fstream &file, int bit, bool force) {
   static int current_bit = 8;
   static unsigned char bit_buffer;
@@ -283,101 +152,20 @@ void writeBit(std::fstream &file, int bit, bool force) {
   }
 }
 
-std::vector<Color> sortColorsBySubcolor(std::vector<Color> &colors,
-                                        char subcolor) {
-  if (subcolor == 'r') {
-    std::sort(colors.begin(), colors.end(),
-              [](const Color &lhs, const Color &rhs) { return lhs.r > rhs.r; });
-  } else if (subcolor == 'g') {
-    std::sort(colors.begin(), colors.end(),
-              [](const Color &lhs, const Color &rhs) { return lhs.g > rhs.g; });
-  } else {
-    std::sort(colors.begin(), colors.end(),
-              [](const Color &lhs, const Color &rhs) { return lhs.b > rhs.b; });
-  }
-
-  return colors;
-}
-
-char findBiggestRange(std::vector<Color> colors) {
-  int rMin = 256, rMax = 0, gMin = 256, gMax = 0, bMin = 256, bMax = 0;
-
-  for (auto it = colors.begin(); it != colors.end(); ++it) {
-    rMin = std::min(rMin, (int)it->r);
-    rMax = std::max(rMax, (int)it->r);
-    gMin = std::min(gMin, (int)it->g);
-    gMax = std::max(gMax, (int)it->g);
-    bMin = std::min(bMin, (int)it->b);
-    bMax = std::max(bMax, (int)it->b);
-  }
-
-  const int rRange = rMax - rMin;
-  const int gRange = gMax - gMin;
-  const int bRange = bMax - bMin;
-
-  const int biggestRange = std::max(rRange, std::max(gRange, bRange));
-
-  if (biggestRange == rRange)
-    return 'r';
-  else if (biggestRange == gRange)
-    return 'g';
-  else
-    return 'b';
-}
-
-std::vector<Color> generate6BitColorTableMedianCut(BMP &bmp) {
-  std::vector<Color> retVal;
-
-  for (int i = 0; i < bmp.getWidth(); ++i) {
-    for (int j = 0; j < bmp.getHeight(); ++j) {
-      auto index = std::find(retVal.begin(), retVal.end(), bmp.getPixel(i, j));
-      if (index == retVal.end())
-        retVal.push_back(bmp.getPixel(i, j));
-    }
-  }
-
-  return medianCut(retVal, 0);
-}
-
-std::vector<Color> medianCut(std::vector<Color> colors, int depth,
-                             int maxDepth) {
-  if (depth == maxDepth) {
-    int r = 0, g = 0, b = 0;
-    for (auto it = colors.begin(); it != colors.end(); ++it) {
-      r += it->r;
-      g += it->g;
-      b += it->b;
-    }
-    r = r / colors.size();
-    g = g / colors.size();
-    b = b / colors.size();
-    return std::vector<Color>(1, Color{r, g, b});
-  }
-
-  const char subcolorToSortBy = findBiggestRange(colors);
-  sortColorsBySubcolor(colors, subcolorToSortBy);
-
-  std::size_t const half_size = colors.size() / 2;
-  std::vector<Color> left =
-      std::vector<Color>(colors.begin(), colors.begin() + half_size);
-  std::vector<Color> right =
-      std::vector<Color>(colors.begin() + half_size, colors.end());
-
-  left = medianCut(left, depth + 1, maxDepth);
-  right = medianCut(right, depth + 1, maxDepth);
-
-  left.insert(left.end(), right.begin(), right.end());
-  return left;
-}
-
+/**
+ * @brief Applies dithering for given bmp image and given color table
+ *
+ * @param bmp
+ * @param colorTable
+ */
 void applyDithering(BMP &bmp, std::vector<Color> &colorTable) {
   Color currentPixel;
   Color choosenColor;
 
+  // Storage for errors in color conversion
   float **errorsR = new float *[bmp.getWidth() + 2];
   float **errorsG = new float *[bmp.getWidth() + 2];
   float **errorsB = new float *[bmp.getWidth() + 2];
-
   for (int i = 0; i < bmp.getWidth() + 2; ++i) {
     errorsR[i] = new float[bmp.getHeight() + 2]{0};
     errorsG[i] = new float[bmp.getHeight() + 2]{0};
@@ -391,6 +179,7 @@ void applyDithering(BMP &bmp, std::vector<Color> &colorTable) {
     for (int x = 0; x < bmp.getWidth(); x++) {
       currentPixel = bmp.getPixel(x, y);
 
+      // Passing current error to current Pixel with overflow protetcion
       if (currentPixel.r + errorsR[x + shift][y] > 255)
         currentPixel.r = 255;
       else if (currentPixel.r + errorsR[x + shift][y] < 0)
@@ -412,15 +201,19 @@ void applyDithering(BMP &bmp, std::vector<Color> &colorTable) {
       else
         currentPixel.b += errorsB[x + shift][y];
 
+      // Matching color from give table
       choosenColor =
           colorTable[findClosestColorIndexFromTable(currentPixel, colorTable)];
 
+      // Calculating error from current pixel
       currentErrorR = currentPixel.r - choosenColor.r;
       currentErrorG = currentPixel.g - choosenColor.g;
       currentErrorB = currentPixel.b - choosenColor.b;
 
       bmp.setPixel(x, y, choosenColor);
 
+      // Pasing errors from current pixels to rest as determined in
+      // Floyd–Steinber alg
       errorsR[x + 1 + shift][y] += (currentErrorR * 7.0 / 16.0);
       errorsR[x + 1 + shift][y + 1] += (currentErrorR * 1.0 / 16.0);
       errorsR[x + shift][y + 1] += (currentErrorR * 5.0 / 16.0);

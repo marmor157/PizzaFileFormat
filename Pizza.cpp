@@ -1,5 +1,6 @@
 #include "Pizza.h"
 #include "Algs.h"
+#include "ColorTableAlgs.h"
 #include <cmath>
 #include <cstring>
 #include <iostream>
@@ -40,7 +41,7 @@ Pizza::Pizza(std::string name) { loadFromFile(name); }
  * @param bmp
  * @param colorTable 0=Color, 1=Grayscale, >1=Custom
  */
-Pizza::Pizza(BMP &bmp, int colorTable) {
+Pizza::Pizza(BMP &bmp, int colorTable, int isDitheringEnabled, int algType) {
   m_width = bmp.getWidth();
   m_height = bmp.getHeight();
 
@@ -50,13 +51,17 @@ Pizza::Pizza(BMP &bmp, int colorTable) {
       (colorTable << 6); // set two most important bits to color Table value
 
   if (colorTable >= 2) {
-    m_colorTable = generate6BitColorTableMedianCut(bmp);
+    if (algType == 0)
+      m_colorTable = generate6BitColorTableMedianCut(bmp);
+    else
+      m_colorTable = generate6BitColorTable(bmp);
   } else if (colorTable)
     copyColorTableToVector(DEFAULT_GRAYSCALE_TABLE, m_colorTable);
   else
     copyColorTableToVector(DEFAULT_COLOR_TABLE, m_colorTable);
 
-  applyDithering(bmp, m_colorTable);
+  if (isDitheringEnabled)
+    applyDithering(bmp, m_colorTable);
 
   m_pixels = new uint8_t *[m_width];
   for (int i = 0; i < m_width; ++i) {
@@ -166,6 +171,11 @@ void Pizza::loadFromFile(std::string name) {
   file.close();
 }
 
+/**
+ * @brief Saves pizza to fiven file
+ *
+ * @param name File name
+ */
 void Pizza::saveToFile(std::string name) {
   std::fstream file;
   file.open(name, std::ios::out | std::ios::binary);

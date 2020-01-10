@@ -19,14 +19,6 @@ struct Color {
     return true;
   }
 
-  inline Color operator-(const Color &rhs) {
-    Color retVal;
-    retVal.r = r - rhs.r;
-    retVal.g = g - rhs.g;
-    retVal.b = b - rhs.b;
-    return retVal;
-  }
-
   /**
    * @brief Returns Color as a three character string
    *
