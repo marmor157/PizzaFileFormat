@@ -18,8 +18,7 @@ Pizza::Pizza(int width, int height, int colorTable)
     m_pixels[i] = new uint8_t[height];
   }
 
-  m_header.colorTableAndCRC |=
-      (colorTable << 6); // set two most important bits to color Table value
+  m_header.colorTable = colorTable;
 
   m_colorTable.resize(64);
   if (colorTable)
@@ -47,8 +46,7 @@ Pizza::Pizza(BMP &bmp, int colorTable, int isDitheringEnabled, int algType) {
 
   m_colorTable.resize(64);
 
-  m_header.colorTableAndCRC |=
-      (colorTable << 6); // set two most important bits to color Table value
+  m_header.colorTable = colorTable;
 
   if (colorTable >= 2) {
     if (algType == 0)
@@ -98,10 +96,8 @@ void Pizza::loadFromFile(std::string name) {
   m_width = m_header.width;
   m_height = m_header.height;
 
-  int colorTableType = m_header.colorTableAndCRC >> 6;
-
   m_colorTable.resize(64);
-  if (colorTableType >= 2) {
+  if (m_header.colorTable >= 2) {
 
     dataSize -= 192;
 
@@ -117,7 +113,7 @@ void Pizza::loadFromFile(std::string name) {
   } else {
     file.seekg(8, file.beg); // Skip to pixel table
 
-    if (colorTableType == 0) // Set default color table as current
+    if (m_header.colorTable == 0) // Set default color table as current
       copyColorTableToVector(DEFAULT_COLOR_TABLE, m_colorTable);
     else // Set default grayscale table as current
       copyColorTableToVector(DEFAULT_GRAYSCALE_TABLE, m_colorTable);
@@ -191,7 +187,7 @@ void Pizza::saveToFile(std::string name) {
   file.write((char *)&m_header, 8);
 
   // If custom color table is provided
-  if ((m_header.colorTableAndCRC >> 6) >= 2) {
+  if (m_header.colorTable >= 2) {
     unsigned char data[192];
     for (int i = 0; i < 64; ++i) {
       data[i * 3] = (char)m_colorTable[i].r;
