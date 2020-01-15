@@ -187,7 +187,7 @@ std::vector<Color> medianCut(std::vector<Color> colors, int depth,
     r = r / colors.size();
     g = g / colors.size();
     b = b / colors.size();
-    return std::vector<Color>(1, Color{r, g, b});
+    return std::vector<Color>(1, Color{(uint8_t)r, (uint8_t)g, (uint8_t)b});
   }
 
   const char subcolorToSortBy = findBiggestRange(colors);
