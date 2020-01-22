@@ -189,7 +189,7 @@ void applyDithering(BMP &bmp, std::vector<Color> &colorTable) {
 
       if (currentPixel.g + errorsG[x + shift][y] > 255)
         currentPixel.g = 255;
-      else if (currentPixel.r + errorsG[x + shift][y] < 0)
+      else if (currentPixel.g + errorsG[x + shift][y] < 0)
         currentPixel.g = 0;
       else
         currentPixel.g += errorsG[x + shift][y];
