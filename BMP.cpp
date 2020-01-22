@@ -63,7 +63,7 @@ void BMP::loadFromFile(std::string name) {
   m_height = m_DIBHeader.height;
 
   // skip to start of pixer array
-  file.seekg(*(char *)&m_fileHeader.dataPosition, file.beg);
+  file.seekg(m_fileHeader.dataPosition, file.beg);
 
   // Declaring pixels array
   m_pixels = new Color *[m_width];

@@ -222,6 +222,8 @@ std::vector<Color> generate6BitColorTableMedianCut(BMP &bmp) {
         retVal.push_back(bmp.getPixel(i, j));
     }
   }
-
-  return medianCut(retVal, 0);
+  if (retVal.size() <= 64)
+    return retVal;
+  else
+    return medianCut(retVal, 0);
 }
