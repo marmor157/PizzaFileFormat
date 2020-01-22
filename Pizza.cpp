@@ -81,8 +81,7 @@ void Pizza::loadFromFile(std::string name) {
   // We open the file at the end so we are able to determine its size
   file.open(name, std::ios::in | std::ios::binary | std::ios::ate);
 
-  std::fstream::pos_type fileSize = file.tellg();
-  int dataSize = fileSize - 8;
+  int dataSize = (int)file.tellg() - 8;
 
   // Aftrer reading the size, we have to reset position to the start
   file.seekg(0);
