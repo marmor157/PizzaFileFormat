@@ -59,9 +59,7 @@ void copyColorTableToVector(const Color *source,
 /**
  * @brief Generates custom 6 bit color table for best image reproduction
  *
- * @param image Two dimensional array of Colors, image[width][height]
- * @param imageWidth
- * @param imageHeight
+ * @param bmp BMP image to source colors
  * @return std::vector<Color>
  */
 std::vector<Color> generate6BitColorTable(BMP &bmp) {
@@ -214,14 +212,14 @@ std::vector<Color> medianCut(std::vector<Color> colors, int depth,
  */
 std::vector<Color> generate6BitColorTableMedianCut(BMP &bmp) {
   std::vector<Color> retVal;
+  retVal.reserve(bmp.getHeight() * bmp.getWidth());
 
   for (int i = 0; i < bmp.getWidth(); ++i) {
     for (int j = 0; j < bmp.getHeight(); ++j) {
-      auto index = std::find(retVal.begin(), retVal.end(), bmp.getPixel(i, j));
-      if (index == retVal.end())
-        retVal.push_back(bmp.getPixel(i, j));
+      retVal.push_back(bmp.getPixel(i, j));
     }
   }
+
   if (retVal.size() <= 64)
     return retVal;
   else
