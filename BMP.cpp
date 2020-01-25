@@ -93,6 +93,9 @@ void BMP::loadFromFile(std::string name) {
       m_pixels[j][i] = {r, g, b};
     }
     data -= size; // resets pointer to point on the start of the array
+
+    if (m_DIBHeader.bitsPerPixel != 32)
+      file.read((char *)data, 4 - (m_width * m_DIBHeader.bitsPerPixel / 8) % 4);
   }
 
   delete[] data;
@@ -124,7 +127,11 @@ void BMP::saveToFile(std::string name) {
   m_DIBHeader.headerSize = 40; // Setting basic DIB header size
   m_fileHeader.dataPosition =
       14 + m_DIBHeader.headerSize; // File header always takes 14 bytes
-  m_fileHeader.fileSize = m_width * m_height * 3 + m_fileHeader.dataPosition;
+  if ((m_width * 3) % 4 == 0)
+    m_fileHeader.fileSize = (m_width)*m_height * 3 + m_fileHeader.dataPosition;
+  else
+    m_fileHeader.fileSize = (m_width)*m_height * 3 + m_fileHeader.dataPosition +
+                            (4 - (m_width * 3) % 4) * m_height;
 
   m_DIBHeader.width = m_width;
   m_DIBHeader.height = m_height;
@@ -137,6 +144,7 @@ void BMP::saveToFile(std::string name) {
 
   int size = 3 * m_width;
   unsigned char *data = new unsigned char[size];
+  int zero[4]{0};
 
   // Saving rom bottom row to the first
   for (int i = m_height - 1; i >= 0; --i) {
@@ -147,6 +155,7 @@ void BMP::saveToFile(std::string name) {
       data[j * 3 + 2] = (char)m_pixels[j][i].r;
     }
     file.write((char *)data, size);
+    file.write((char *)&zero, 4 - (m_width * 3) % 4);
   }
 
   delete[] data;

@@ -74,8 +74,8 @@ Pizza::Pizza(BMP &bmp, int colorTable, int isDitheringEnabled, int algType) {
     }
   }
 
-  std::cout << "Wysokosc obrazka: " << m_width << std::endl;
-  std::cout << "Szerokosc obrazka: " << m_height << std::endl;
+  std::cout << "Szerokosc obrazka: " << m_width << std::endl;
+  std::cout << "Wysokosc obrazka: " << m_height << std::endl;
   std::cout << "Typ palety koloru: ";
   if (colorTable == 0)
     std::cout << "Kolorowa domyslna" << std::endl;
