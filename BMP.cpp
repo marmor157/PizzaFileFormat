@@ -94,7 +94,8 @@ void BMP::loadFromFile(std::string name) {
     }
     data -= size; // resets pointer to point on the start of the array
 
-    if (m_DIBHeader.bitsPerPixel != 32)
+    if (m_DIBHeader.bitsPerPixel != 32 &&
+        (m_width * m_DIBHeader.bitsPerPixel / 8) % 4 != 0)
       file.read((char *)data, 4 - (m_width * m_DIBHeader.bitsPerPixel / 8) % 4);
   }
 
@@ -155,7 +156,8 @@ void BMP::saveToFile(std::string name) {
       data[j * 3 + 2] = (char)m_pixels[j][i].r;
     }
     file.write((char *)data, size);
-    file.write((char *)&zero, 4 - (m_width * 3) % 4);
+    if ((m_width * 3) % 4 != 0)
+      file.write((char *)&zero, 4 - (m_width * 3) % 4);
   }
 
   delete[] data;
