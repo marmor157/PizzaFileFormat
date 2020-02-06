@@ -32,7 +32,11 @@ Pizza::Pizza(int width, int height, int colorTable)
  *
  * @param name File name
  */
-Pizza::Pizza(std::string name) { loadFromFile(name); }
+Pizza::Pizza(std::string name) {
+  loadFromFile(name);
+  std::cout << "Szerokosc obrazka: " << m_header.width << std::endl;
+  std::cout << "Wysokosc obrazka: " << m_header.height << std::endl;
+}
 
 /**
  * @brief Construct a new Pizza:: Pizza object with copying image from BMP
@@ -69,6 +73,16 @@ Pizza::Pizza(BMP &bmp, int colorTable, int isDitheringEnabled, int algType) {
           bmp.getPixel(i, j), m_colorTable, colorTable == 1);
     }
   }
+
+  std::cout << "Wysokosc obrazka: " << m_width << std::endl;
+  std::cout << "Szerokosc obrazka: " << m_height << std::endl;
+  std::cout << "Typ palety koloru: ";
+  if (colorTable == 0)
+    std::cout << "Kolorowa domyslna" << std::endl;
+  else if (colorTable == 1)
+    std::cout << "Skala szarosci domyslna" << std::endl;
+  else
+    std::cout << "Kolorowa dedykowana" << std::endl;
 }
 
 /**
